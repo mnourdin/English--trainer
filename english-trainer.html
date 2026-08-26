@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Accelerator · Miguel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:#0F1117;color:#E8EAF0;min-height:100vh;padding-bottom:60px}
+
+  /* ── NAV TABS ── */
+  .nav{display:flex;gap:0;background:#181C27;border-bottom:1px solid #252A38;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:100}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{flex-shrink:0;padding:14px 18px;background:none;border:none;border-bottom:3px solid transparent;color:#6B7280;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit}
+  .nav button.active{color:#fff;border-bottom-color:#4F8EF7}
+  .nav button:hover:not(.active){color:#9CA3AF}
+
+  /* ── HERO ── */
+  .hero{background:linear-gradient(160deg,#141927 0%,#1C2540 50%,#0E1A30 100%);padding:32px 20px 24px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(79,142,247,.18) 0%,transparent 70%);pointer-events:none}
+  .eyebrow{font-size:11px;letter-spacing:3px;color:#4F8EF7;text-transform:uppercase;margin-bottom:10px;font-weight:700}
+  .hero h1{font-size:26px;font-weight:900;color:#fff;line-height:1.15;margin-bottom:6px}
+  .hero p{font-size:13px;color:#8B93A8;margin-bottom:20px}
+
+  /* ── PROGRESS RING ── */
+  .ring-wrap{display:flex;justify-content:center;margin-bottom:20px}
+  .ring-svg{transform:rotate(-90deg)}
+  .ring-bg{fill:none;stroke:#252A38;stroke-width:8}
+  .ring-fg{fill:none;stroke:#4F8EF7;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+  .ring-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+  .ring-pct{font-size:22px;font-weight:900;color:#fff}
+  .ring-label{font-size:10px;color:#6B7280;font-weight:600;letter-spacing:1px}
+
+  /* ── STAT PILLS ── */
+  .stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+  .stat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 16px;text-align:center;min-width:80px}
+  .stat-val{font-size:20px;font-weight:900;color:#fff}
+  .stat-lbl{font-size:10px;color:#6B7280;font-weight:600;margin-top:2px;letter-spacing:.5px}
+
+  /* ── SECTION CARDS ── */
+  .section{padding:0 16px;margin-top:20px}
+  .card{background:#181C27;border:1px solid #252A38;border-radius:16px;overflow:hidden;margin-bottom:14px}
+  .card-head{padding:16px 18px 12px;border-bottom:1px solid #252A38;display:flex;align-items:center;gap:12px}
+  .card-head h2{font-size:15px;font-weight:800;color:#fff}
+  .card-head p{font-size:12px;color:#6B7280;margin-top:2px}
+  .phase-dot{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .card-body{padding:16px 18px}
+
+  /* ── DAY GRID ── */
+  .day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:6px}
+  .day-label{font-size:9px;color:#6B7280;text-align:center;font-weight:700;letter-spacing:.5px;padding-bottom:4px}
+  .day-cell{aspect-ratio:1;border-radius:6px;border:1px solid #252A38;background:#0F1117;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:#4B5563;font-weight:600;transition:all .15s;position:relative}
+  .day-cell.done{background:#1A3A2A;border-color:#22C55E;color:#22C55E}
+  .day-cell.today{border-color:#4F8EF7;background:#1A2540;color:#4F8EF7;font-weight:800}
+  .day-cell.future{opacity:.35;cursor:default}
+  .day-cell.done::after{content:'✓';font-size:10px}
+  .day-cell:not(.future):not(.done):hover{border-color:#4F8EF7;background:#1A2540}
+  .week-label{font-size:10px;color:#6B7280;font-weight:600;margin-bottom:6px;padding-top:10px}
+
+  /* ── WEEKLY CHECK ── */
+  .check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #1C2230}
+  .check-item:last-child{border-bottom:none}
+  .check-box{width:22px;height:22px;border-radius:6px;border:2px solid #2D3448;background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+  .check-box.checked{background:#4F8EF7;border-color:#4F8EF7;color:#fff}
+  .check-text{font-size:13px;color:#C4C9D4;line-height:1.5;flex:1}
+  .check-text.checked-text{color:#6B7280;text-decoration:line-through}
+
+  /* ── MILESTONE BADGES ── */
+  .badges{display:flex;gap:10px;flex-wrap:wrap}
+  .badge{background:#1A2030;border:1px solid #252A38;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:8px;flex:1;min-width:140px}
+  .badge.unlocked{border-color:#4F8EF7;background:#141D35}
+  .badge-icon{font-size:20px}
+  .badge-name{font-size:12px;font-weight:700;color:#E8EAF0}
+  .badge-sub{font-size:10px;color:#6B7280;margin-top:2px}
+  .badge.unlocked .badge-name{color:#4F8EF7}
+  .badge.unlocked .badge-sub{color:#7BA8F5}
+
+  /* ── MEASUREMENTS ── */
+  .measure-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1C2230}
+  .measure-row:last-child{border-bottom:none}
+  .measure-label{font-size:13px;color:#C4C9D4}
+  .measure-sub{font-size:11px;color:#6B7280;margin-top:2px}
+  .stars{display:flex;gap:3px}
+  .star{width:26px;height:26px;border-radius:6px;border:1px solid #2D3448;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
+  .star.lit{background:#F59E0B;border-color:#F59E0B}
+  .star:hover{border-color:#F59E0B}
+
+  /* ── RECOMMENDATIONS ── */
+  .rec{background:#141D35;border:1px solid #1E2D50;border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .rec-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .rec-emoji{font-size:18px}
+  .rec-title{font-size:13px;font-weight:700;color:#7BA8F5}
+  .rec-body{font-size:12px;color:#8B93A8;line-height:1.6}
+  .rec.warn{background:#1F1A10;border-color:#3D2E10}
+  .rec.warn .rec-title{color:#F59E0B}
+  .rec.good{background:#0F1F15;border-color:#1A3524}
+  .rec.good .rec-title{color:#4ADE80}
+
+  /* ── PHASE TIMELINE ── */
+  .timeline{position:relative;padding-left:28px}
+  .timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:#252A38}
+  .tl-item{position:relative;margin-bottom:20px}
+  .tl-dot{position:absolute;left:-23px;top:2px;width:14px;height:14px;border-radius:50%;border:2px solid #252A38;background:#0F1117}
+  .tl-dot.active{border-color:#4F8EF7;background:#4F8EF7}
+  .tl-dot.done-dot{border-color:#22C55E;background:#22C55E}
+  .tl-title{font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px}
+  .tl-sub{font-size:12px;color:#6B7280;line-height:1.5}
+  .tl-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-bottom:6px}
+
+  /* ── DAILY SCHEDULE ── */
+  .sched-row{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid #1C2230}
+  .sched-row:last-child{border-bottom:none}
+  .sched-time{font-size:11px;font-weight:700;color:#4F8EF7;min-width:56px;padding-top:2px;letter-spacing:.3px}
+  .sched-icon{font-size:18px;flex-shrink:0}
+  .sched-text strong{font-size:13px;color:#E8EAF0;display:block;margin-bottom:2px}
+  .sched-text span{font-size:12px;color:#6B7280;line-height:1.4}
+
+  /* ── UTILITY ── */
+  .pill{display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.5px}
+  .pill-blue{background:#1A2D50;color:#4F8EF7;border:1px solid #1E3A6A}
+  .pill-green{background:#0F2A1A;color:#22C55E;border:1px solid #1A4028}
+  .pill-amber{background:#2A1F0A;color:#F59E0B;border:1px solid #3D2E10}
+  .pill-purple{background:#1E1535;color:#A78BFA;border:1px solid #2D1F50}
+  .section-title{font-size:11px;font-weight:700;color:#6B7280;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+  .btn{display:block;width:100%;padding:13px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;text-align:center}
+  .btn-primary{background:#4F8EF7;color:#fff}
+  .btn-primary:hover{background:#3B7AE8}
+  .btn-ghost{background:#181C27;color:#9CA3AF;border:1px solid #252A38}
+  .btn-ghost:hover{color:#fff;border-color:#4F8EF7}
+  .btn-success{background:#16A34A;color:#fff}
+
+  /* ── TOAST ── */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#22C55E;color:#fff;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:700;z-index:999;transition:transform .3s ease;white-space:nowrap}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="eyebrow">Tu camino al inglés profesional</div>
+  <h1>English Accelerator</h1>
+  <p>Plan de 252 días · 55 min/día · De básico a B2</p>
+
+  <div class="stats" id="heroStats">
+    <div class="stat"><div class="stat-val" id="statDays">0</div><div class="stat-lbl">Días streak</div></div>
+    <div class="stat"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total completados</div></div>
+    <div class="stat"><div class="stat-val" id="statLevel">A1</div><div class="stat-lbl">Nivel actual</div></div>
+    <div class="stat"><div class="stat-val" id="statWeek">S1</div><div class="stat-lbl">Semana</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="active" onclick="showTab('hoy')">📅 Hoy</button>
+  <button onclick="showTab('tracker')">🗓️ Tracker</button>
+  <button onclick="showTab('medicion')">📊 Medición</button>
+  <button onclick="showTab('plan')">🗺️ Plan</button>
+  <button onclick="showTab('logros')">🏆 Logros</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: HOY -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-hoy">
+
+  <div class="section" id="recSection"></div>
+
+  <div class="section">
+    <div class="section-title">Rutina de hoy · <span id="todayPhaseLabel">Fase 1</span></div>
+    <div class="card">
+      <div class="card-body" id="scheduleBody"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Check diario — ¿Qué completaste?</div>
+    <div class="card">
+      <div class="card-body" id="dailyChecks"></div>
+    </div>
+    <button class="btn btn-primary" id="markDoneBtn" onclick="markDayDone()" style="margin-top:12px">
+      ✅ Marcar día como completado
+    </button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: TRACKER -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-tracker" style="display:none">
+  <div class="section">
+    <div class="section-title">Calendario de práctica — 252 días</div>
+    <div id="calendarBody"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: MEDICIÓN -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-medicion" style="display:none">
+  <div class="section">
+    <div class="section-title">Autoevaluación semanal</div>
+    <p style="font-size:12px;color:#6B7280;margin-bottom:16px">Califícate de 1–5 estrellas en cada habilidad. Hazlo cada semana, mismo día.</p>
+    <div class="card">
+      <div class="card-body" id="measureBody"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveMeasure()" style="margin-top:12px">Guardar evaluación</button>
+  </div>
+
+  <div class="section" style="margin-top:4px">
+    <div class="section-title">Historial de progreso</div>
+    <div id="measureHistory"></div>
+  </div>
+
+  <div class="section" style="margin-top:4px">
+    <div class="section-title">Tests externos recomendados</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="check-item">
+          <div style="font-size:24px;margin-top:2px">🌐</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#E8EAF0">EF SET (15 min, gratis)</div>
+            <div style="font-size:12px;color:#6B7280;margin-top:3px">efset.org — Hazlo al <strong style="color:#4F8EF7">inicio, semana 10, semana 20 y semana 36</strong>. Te da nivel CEFR (A1→B2). Guarda tu resultado aquí abajo.</div>
+          </div>
+        </div>
+        <div class="check-item">
+          <div style="font-size:24px;margin-top:2px">🎙️</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#E8EAF0">Grabación propia (oral)</div>
+            <div style="font-size:12px;color:#6B7280;margin-top:3px">Grábate 60 seg hablando de tu trabajo (en inglés) — cada 4 semanas. Escucha la anterior: notarás el avance.</div>
+          </div>
+        </div>
+        <div class="check-item">
+          <div style="font-size:24px;margin-top:2px">✍️</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#E8EAF0">Email sin corrector</div>
+            <div style="font-size:12px;color:#6B7280;margin-top:3px">Cada 4 semanas escribe un email de trabajo en inglés sin Grammarly. Mide: tiempo + errores al revisar.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:16px">Mi nivel EF SET</div>
+    <div class="card">
+      <div class="card-body">
+        <div id="efsetHistory"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+          <select id="efsetLevel" style="background:#0F1117;border:1px solid #2D3448;color:#E8EAF0;border-radius:8px;padding:10px;font-size:13px;font-family:inherit">
+            <option value="">Nivel obtenido…</option>
+            <option>A1</option><option>A2</option><option>B1</option><option>B1+</option><option>B2</option><option>C1</option>
+          </select>
+          <button class="btn btn-ghost" onclick="saveEFSET()" style="padding:10px">Registrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: PLAN -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-plan" style="display:none">
+  <div class="section">
+    <div class="section-title">Hoja de ruta — 252 días</div>
+    <div class="timeline" id="planTimeline"></div>
+  </div>
+
+  <div class="section" style="margin-top:4px">
+    <div class="section-title">Recursos por fase</div>
+    <div id="resourceCards"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: LOGROS -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-logros" style="display:none">
+  <div class="section">
+    <div class="section-title">Hitos desbloqueados</div>
+    <div id="badgesGrid"></div>
+  </div>
+  <div class="section" style="margin-top:4px">
+    <div class="section-title">Próximo hito</div>
+    <div class="card" id="nextMilestone"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const START_DATE = (() => {
+  let s = localStorage.getItem('eng_start');
+  if (!s) { s = new Date().toISOString().split('T')[0]; localStorage.setItem('eng_start', s); }
+  return new Date(s + 'T00:00:00');
+})();
+
+const TOTAL_DAYS = 252;
+const today = new Date(); today.setHours(0,0,0,0);
+const dayIndex = Math.floor((today - START_DATE) / 86400000); // 0-based
+
+function getState() {
+  return JSON.parse(localStorage.getItem('eng_state') || JSON.stringify({
+    done: {},       // {dayIndex: true}
+    checks: {},     // {dayIndex: {0:true,1:true,...}}
+    measures: [],   // [{week, listening, speaking, reading, writing, vocab, note}]
+    efset: [],      // [{date, level}]
+  }));
+}
+function setState(s) { localStorage.setItem('eng_state', JSON.stringify(s)); }
+
+// ══════════════════════════════════════
+// PHASES — 252 days exactly
+// ══════════════════════════════════════
+const PHASES = [
+  {
+    id:1, label:'Fase 1', title:'Survival English', color:'#3B82F6', bg:'#141D35',
+    days:[0,27], // days 0-27 = 28 days (4 weeks)
+    pill:'pill-blue', pillTxt:'Semanas 1–4',
+    focus:'Comprensión auditiva + vocabulario esencial',
+    description:'Construir el oído y un vocabulario funcional de 300 palabras. Sin presión de gramática: solo exposición y repetición.',
+    schedule:[
+      {time:'🌅 Mañana',icon:'📱',name:'Anki / Duolingo',detail:'15 min — vocabulario con audio e imagen',dur:15},
+      {time:'🎧 Tarde',icon:'🎙️',name:'Shadowing',detail:'10 min — repite frases de English with Lucy (YouTube)',dur:10},
+      {time:'📺 Noche',icon:'📺',name:'Serie con subtítulos EN',detail:'30 min — Bluey, Peppa Pig adulto o Friends S1',dur:30},
+    ],
+    checks:['Completé Anki/Duolingo hoy','Hice shadowing 10 min','Vi 30 min de serie en inglés','Describí en voz alta algo que hice hoy'],
+    milestoneDay:27,
+    milestoneName:'Primer mes completado',
+    milestone:'Entiendes 50% de un video beginner sin subtítulos + vocabulario activo ≥ 200 palabras',
+    resources:['YouTube: English with Lucy (Beginner)','App: Anki (flashcards con audio)','App: Duolingo (hábito diario)','Serie: Friends S1, Bluey','Podcast: English with Jennifer'],
+  },
+  {
+    id:2, label:'Fase 2', title:'Communication Core', color:'#8B5CF6', bg:'#1A1235',
+    days:[28,69], // 42 days = 6 weeks
+    pill:'pill-purple', pillTxt:'Semanas 5–10',
+    focus:'Gramática funcional + speaking estructurado',
+    description:'Conectar palabras en oraciones reales. Primera clase con tutor, gramática funcional, emails en inglés.',
+    schedule:[
+      {time:'🌅 Mañana',icon:'📖',name:'Grammar in Use',detail:'15 min — 1 unidad/semana (Raymond Murphy)',dur:15},
+      {time:'🎧 Mediodía',icon:'🎧',name:'Podcast BBC',detail:'10 min — 6 Minute English o The English We Speak',dur:10},
+      {time:'🌙 Noche',icon:'✍️',name:'Email/Slack + Tutor',detail:'30 min — 2 emails/sem en inglés + 1 clase semanal iTalki',dur:30},
+    ],
+    checks:['Estudié gramática (Grammar in Use)','Escuché un podcast en inglés','Escribí algo en inglés hoy','Practiqué describir mi trabajo en inglés'],
+    milestoneDay:69,
+    milestoneName:'Puedo comunicarme',
+    milestone:'Completas 45 min con tutor sin bloquearte más de 2 veces + EF SET ≥ A2+',
+    resources:['Libro: English Grammar in Use (Murphy)','Tutor: iTalki.com o Preply.com','Podcast: 6 Minute English (BBC)','App: Grammarly (corrección)','App: Elsa Speak (pronunciación)'],
+  },
+  {
+    id:3, label:'Fase 3', title:'Fluency Sprint', color:'#10B981', bg:'#0F1F18',
+    days:[70,139], // 70 days = 10 weeks
+    pill:'pill-green', pillTxt:'Semanas 11–20',
+    focus:'Fluidez, velocidad y comprensión real',
+    description:'De hablar despacio y correcto a hablar natural. Podcasts sin guión, reuniones reales, series sin subtítulos.',
+    schedule:[
+      {time:'🌅 Mañana',icon:'🎤',name:'Leer en voz alta',detail:'10 min — artículo SAP Community o Hacker News',dur:10},
+      {time:'🎧 Tarde',icon:'🎧',name:'Podcast avanzado',detail:'15 min — Lex Fridman, How I Built This',dur:15},
+      {time:'🌙 Noche',icon:'💬',name:'Tutor + Serie',detail:'30 min — 2 sesiones/sem + serie sin subtítulos (Suits, The Office)',dur:30},
+    ],
+    checks:['Leí en voz alta 10 min','Escuché podcast sin guión','Practiqué conversación real','Vi contenido sin subtítulos EN'],
+    milestoneDay:139,
+    milestoneName:'Fluidez real',
+    milestone:'Entiendes 80%+ de un podcast sin guión + presentación técnica de 5 min grabada + EF SET ≥ B1',
+    resources:['Podcast: Lex Fridman, How I Built This, Changelog','Serie: Suits, The Office, Sherlock (sin sub)','Herramienta: Speechling (pronunciación)','Comunidad: SAP Community forums en inglés','Tutor: 2 sesiones/semana en iTalki'],
+  },
+  {
+    id:4, label:'Fase 4', title:'Professional Mastery', color:'#F59E0B', bg:'#1F1A0F',
+    days:[140,251], // 112 days = 16 weeks
+    pill:'pill-amber', pillTxt:'Semanas 21–36',
+    focus:'Inglés técnico + presentaciones profesionales',
+    description:'Inglés para el trabajo real: documentación SAP, workshops, presentaciones a stakeholders internacionales.',
+    schedule:[
+      {time:'🌅 Mañana',icon:'📋',name:'Documentación técnica',detail:'15 min — Leer y resumir artículo SAP Help Portal',dur:15},
+      {time:'💼 Trabajo',icon:'🌐',name:'SAP Community',detail:'10 min — Responder 1 hilo por semana en inglés',dur:10},
+      {time:'🌙 Noche',icon:'🎤',name:'Presentación + TedTalk',detail:'30 min — Grábate 1 presentación/mes + TedTalk técnico',dur:30},
+    ],
+    checks:['Leí documentación técnica en inglés','Escribí o respondí algo técnico en inglés','Practiqué presentación o speaking largo','Vi contenido técnico sin adaptación'],
+    milestoneDay:251,
+    milestoneName:'English profesional B2',
+    milestone:'Presentas en inglés ante audiencia real + documentas un iFlow sin traducción + EF SET ≥ B2',
+    resources:['Coursera: English for Business Communication (Michigan)','TedTalks técnicos, SAP TechEd sessions','SAP Community forums (participación activa)','Certificación: Cambridge B2 First (opcional)','Herramienta: Hemingway App (escritura clara)'],
+  },
+];
+
+function getPhase(dIdx) {
+  return PHASES.find(p => dIdx >= p.days[0] && dIdx <= p.days[1]) || PHASES[PHASES.length-1];
+}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function weekNum(dIdx) { return Math.floor(dIdx/7)+1; }
+
+function completedCount() {
+  return Object.keys(getState().done).length;
+}
+
+function currentStreak() {
+  const s = getState();
+  let streak = 0;
+  for (let d = dayIndex; d >= 0; d--) {
+    if (s.done[d]) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function updateHeroStats() {
+  const phase = getPhase(Math.max(0,dayIndex));
+  document.getElementById('statDays').textContent = currentStreak();
+  document.getElementById('statTotal').textContent = completedCount();
+  document.getElementById('statLevel').textContent = guessLevel();
+  document.getElementById('statWeek').textContent = 'S'+weekNum(Math.max(0,dayIndex));
+}
+
+function guessLevel() {
+  const s = getState();
+  if (s.efset && s.efset.length) return s.efset[s.efset.length-1].level;
+  const d = Math.max(0,dayIndex);
+  if (d<28) return 'A1';
+  if (d<70) return 'A2';
+  if (d<140) return 'B1';
+  return 'B1+';
+}
+
+// ══════════════════════════════════════
+// TAB SWITCH
+// ══════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll('[id^="tab-"]').forEach(el=>el.style.display='none');
+  document.getElementById('tab-'+id).style.display='block';
+  document.querySelectorAll('.nav button').forEach((b,i)=>{
+    b.classList.toggle('active', b.getAttribute('onclick').includes("'"+id+"'"));
+  });
+  if (id==='tracker') renderCalendar();
+  if (id==='medicion') renderMeasure();
+  if (id==='plan') renderPlan();
+  if (id==='logros') renderBadges();
+  updateHeroStats();
+}
+
+// ══════════════════════════════════════
+// TAB: HOY
+// ══════════════════════════════════════
+function renderHoy() {
+  const phase = getPhase(Math.max(0,dayIndex));
+  document.getElementById('todayPhaseLabel').textContent = phase.label + ' · ' + phase.title;
+
+  // Recommendations
+  const recEl = document.getElementById('recSection');
+  const s = getState();
+  const streak = currentStreak();
+  const recs = [];
+
+  if (streak === 0 && dayIndex > 0 && !s.done[dayIndex-1]) {
+    recs.push({cls:'warn', emoji:'⚠️', title:'Ayer rompiste la cadena', body:'No pasa nada — el progreso no es lineal. Hoy vuelves a empezar. La consistencia a largo plazo es lo que construye el idioma.'});
+  }
+  if (streak >= 7) {
+    recs.push({cls:'good', emoji:'🔥', title:'¡'+streak+' días seguidos!', body:'Estás en racha. En este punto tu cerebro ya empezó a procesar el inglés de fondo, incluso cuando no practicas.'});
+  }
+  if (dayIndex === 0) {
+    recs.push({cls:'', emoji:'🚀', title:'Día 1 — ¡empieza hoy!', body:'El mejor momento para comenzar fue hace un mes. El segundo mejor momento es ahora. Completa las 3 actividades de hoy y marca el día.'});
+  }
+  const wk = weekNum(Math.max(0,dayIndex));
+  if ([4,10,20,36].includes(wk) && dayIndex > 0) {
+    recs.push({cls:'', emoji:'📊', title:'Esta semana: evalúate', body:'Estás en la semana '+wk+' — es momento de hacer el EF SET (15 min, gratis en efset.org) y tu autoevaluación semanal. Ve a la pestaña Medición.'});
+  }
+  if (recs.length===0) {
+    recs.push({cls:'', emoji:'💡', title:'Consejo del día', body: dayTip(dayIndex)});
+  }
+
+  recEl.innerHTML = '<div class="section-title">Recomendación</div>' +
+    recs.map(r=>`<div class="rec ${r.cls}"><div class="rec-head"><span class="rec-emoji">${r.emoji}</span><span class="rec-title">${r.title}</span></div><div class="rec-body">${r.body}</div></div>`).join('');
+
+  // Schedule
+  const schedEl = document.getElementById('scheduleBody');
+  schedEl.innerHTML = phase.schedule.map(row=>`
+    <div class="sched-row">
+      <div class="sched-time">${row.time}</div>
+      <div class="sched-icon">${row.icon}</div>
+      <div class="sched-text"><strong>${row.name}</strong><span>${row.detail}</span></div>
+    </div>
+  `).join('');
+
+  // Daily checks
+  const checksEl = document.getElementById('dailyChecks');
+  const todayChecks = s.checks[dayIndex] || {};
+  checksEl.innerHTML = phase.checks.map((c,i)=>`
+    <div class="check-item">
+      <div class="check-box ${todayChecks[i]?'checked':''}" onclick="toggleCheck(${i})" id="chk${i}">
+        ${todayChecks[i]?'✓':''}
+      </div>
+      <div class="check-text ${todayChecks[i]?'checked-text':''}" id="chktxt${i}">${c}</div>
+    </div>
+  `).join('');
+
+  // Button state
+  const btn = document.getElementById('markDoneBtn');
+  if (s.done[dayIndex]) {
+    btn.textContent = '✅ Día completado';
+    btn.className = 'btn btn-success';
+    btn.onclick = null;
+  } else {
+    btn.textContent = '✅ Marcar día como completado';
+    btn.className = 'btn btn-primary';
+    btn.onclick = markDayDone;
+  }
+}
+
+function toggleCheck(i) {
+  const s = getState();
+  if (!s.checks[dayIndex]) s.checks[dayIndex] = {};
+  s.checks[dayIndex][i] = !s.checks[dayIndex][i];
+  setState(s);
+  renderHoy();
+}
+
+function markDayDone() {
+  if (dayIndex < 0 || dayIndex >= TOTAL_DAYS) return;
+  const s = getState();
+  s.done[dayIndex] = true;
+  setState(s);
+  toast('¡Día '+( dayIndex+1)+' completado! 💪');
+  renderHoy();
+  updateHeroStats();
+}
+
+function dayTip(d) {
+  const tips = [
+    'Shadowing = imitar al hablante justo después de escucharlo. Es la técnica más efectiva para el acento.',
+    'No traduzcas en tu cabeza. Intenta pensar directamente en inglés, aunque sea con frases sencillas.',
+    'Si ves una palabra nueva, búscala, repítela en voz alta 5 veces y ponla en Anki.',
+    'Pon el teléfono en inglés. Es el truco más simple y más efectivo para el vocabulario pasivo.',
+    'Grábate hablando. Escucharte es incómodo pero revela los errores que no notas al hablar.',
+    'La pronunciación mejora con lectura en voz alta, no solo escuchando.',
+    'Un tutor una vez por semana supera a una app todos los días. La conversación real es irreemplazable.',
+    'No esperes hablar perfecto para hablar. Los errores son datos, no fracasos.',
+    'El inglés técnico de SAP es tu ventaja: ya conoces los conceptos, solo falta el idioma.',
+    'Empieza a pensar el nombre de las cosas en inglés: "I need to open the integration flow".',
+  ];
+  return tips[d % tips.length];
+}
+
+// ══════════════════════════════════════
+// TAB: TRACKER (CALENDAR)
+// ══════════════════════════════════════
+function renderCalendar() {
+  const s = getState();
+  const el = document.getElementById('calendarBody');
+  let html = '';
+  const totalWeeks = Math.ceil(TOTAL_DAYS/7);
+  const dayLabels = ['L','M','X','J','V','S','D'];
+
+  for (let w=0; w<totalWeeks; w++) {
+    const phase = getPhase(w*7);
+    html += `<div class="card" style="margin-bottom:10px;border-color:${phase.color}33">
+      <div class="card-body" style="padding:12px 14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:700;color:${phase.color}">Semana ${w+1} · ${phase.label}</span>
+        <span class="pill pill-blue" style="color:${phase.color};background:${phase.color}18;border-color:${phase.color}33">${doneInWeek(s,w)}/7</span>
+      </div>
+      <div class="day-grid">
+        ${dayLabels.map(l=>`<div class="day-label">${l}</div>`).join('')}
+        ${Array.from({length:7},(_,d)=>{
+          const di = w*7+d;
+          if (di>=TOTAL_DAYS) return '<div></div>';
+          const isDone = !!s.done[di];
+          const isToday = di===dayIndex;
+          const isFuture = di>dayIndex;
+          let cls = 'day-cell';
+          if (isDone) cls+=' done';
+          else if (isToday) cls+=' today';
+          else if (isFuture) cls+=' future';
+          const onclick = (!isFuture&&!isDone) ? `onclick="toggleDay(${di})"` : '';
+          return `<div class="${cls}" ${onclick} title="Día ${di+1}">${isDone?'':'<span style="opacity:.4">${di+1}</span>'}</div>`;
+        }).join('')}
+      </div>
+      </div></div>`;
+  }
+  el.innerHTML = html;
+}
+
+function doneInWeek(s,w) {
+  let c=0;
+  for(let d=0;d<7;d++){if(s.done[w*7+d])c++;}
+  return c;
+}
+
+function toggleDay(di) {
+  if (di > dayIndex) return;
+  const s = getState();
+  s.done[di] = !s.done[di];
+  setState(s);
+  renderCalendar();
+  updateHeroStats();
+  toast(s.done[di] ? '✅ Día '+( di+1)+' marcado' : 'Día '+( di+1)+' desmarcado');
+}
+
+// ══════════════════════════════════════
+// TAB: MEDICIÓN
+// ══════════════════════════════════════
+const SKILLS = [
+  {key:'listening', label:'Comprensión auditiva', sub:'¿Entiendes podcasts/series sin subtítulos?'},
+  {key:'speaking',  label:'Expresión oral',        sub:'¿Puedes expresar ideas sin pausas largas?'},
+  {key:'reading',   label:'Lectura',               sub:'¿Entiendes textos técnicos en inglés?'},
+  {key:'writing',   label:'Escritura',             sub:'¿Escribes emails de trabajo con fluidez?'},
+  {key:'vocab',     label:'Vocabulario',           sub:'¿Tienes palabras para lo que quieres decir?'},
+];
+
+const starState = {};
+SKILLS.forEach(s=>starState[s.key]=0);
+
+function renderMeasure() {
+  const el = document.getElementById('measureBody');
+  el.innerHTML = `<p style="font-size:12px;color:#6B7280;margin-bottom:16px">Semana ${weekNum(Math.max(0,dayIndex))} — ${new Date().toLocaleDateString('es-CL')}</p>` +
+  SKILLS.map(sk=>`
+    <div class="measure-row">
+      <div><div class="measure-label">${sk.label}</div><div class="measure-sub">${sk.sub}</div></div>
+      <div class="stars" id="stars-${sk.key}">
+        ${[1,2,3,4,5].map(n=>`<div class="star ${starState[sk.key]>=n?'lit':''}" onclick="setStar('${sk.key}',${n})" title="${n}">★</div>`).join('')}
+      </div>
+    </div>
+  `).join('') +
+  `<div style="margin-top:14px">
+    <div style="font-size:12px;color:#6B7280;margin-bottom:6px">Nota libre (opcional)</div>
+    <textarea id="measureNote" rows="2" style="width:100%;background:#0F1117;border:1px solid #2D3448;color:#E8EAF0;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical" placeholder="¿Qué notaste esta semana? ¿Dónde mejoraste?"></textarea>
+  </div>`;
+  renderMeasureHistory();
+  renderEFSET();
+}
+
+function setStar(key,val) {
+  starState[key] = val;
+  document.querySelectorAll(`#stars-${key} .star`).forEach((el,i)=>{
+    el.classList.toggle('lit', i<val);
+  });
+}
+
+function saveMeasure() {
+  const s = getState();
+  const entry = { week: weekNum(Math.max(0,dayIndex)), date: new Date().toLocaleDateString('es-CL'), note: document.getElementById('measureNote').value };
+  SKILLS.forEach(sk=>entry[sk.key]=starState[sk.key]);
+  s.measures.push(entry);
+  setState(s);
+  toast('Evaluación guardada 📊');
+  renderMeasureHistory();
+}
+
+function renderMeasureHistory() {
+  const s = getState();
+  const el = document.getElementById('measureHistory');
+  if (!s.measures.length) { el.innerHTML='<div style="font-size:12px;color:#6B7280;padding:8px 0">Aún no hay evaluaciones guardadas.</div>'; return; }
+  el.innerHTML = s.measures.slice().reverse().map(m=>{
+    const avg = (SKILLS.reduce((a,sk)=>a+m[sk.key],0)/SKILLS.length).toFixed(1);
+    const bars = SKILLS.map(sk=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="font-size:10px;color:#6B7280;width:70px;flex-shrink:0">${sk.label.split(' ')[0]}</div>
+        <div style="flex:1;background:#1C2230;border-radius:99px;height:6px">
+          <div style="width:${m[sk.key]*20}%;background:#4F8EF7;height:6px;border-radius:99px;transition:width .6s"></div>
+        </div>
+        <div style="font-size:10px;color:#4F8EF7;width:16px">${m[sk.key]}</div>
+      </div>
+    `).join('');
+    return `<div class="card" style="margin-bottom:10px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+          <div><div style="font-size:13px;font-weight:700;color:#E8EAF0">Semana ${m.week}</div><div style="font-size:11px;color:#6B7280">${m.date}</div></div>
+          <div style="text-align:right"><div style="font-size:22px;font-weight:900;color:#4F8EF7">${avg}</div><div style="font-size:10px;color:#6B7280">/ 5.0</div></div>
+        </div>
+        ${bars}
+        ${m.note?`<div style="font-size:12px;color:#8B93A8;margin-top:8px;font-style:italic">"${m.note}"</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveEFSET() {
+  const level = document.getElementById('efsetLevel').value;
+  if (!level) { toast('Selecciona un nivel primero'); return; }
+  const s = getState();
+  s.efset.push({ date: new Date().toLocaleDateString('es-CL'), level, week: weekNum(Math.max(0,dayIndex)) });
+  setState(s);
+  document.getElementById('efsetLevel').value='';
+  toast('Nivel EF SET guardado: '+level+' 🌐');
+  renderEFSET();
+  updateHeroStats();
+}
+
+function renderEFSET() {
+  const s = getState();
+  const el = document.getElementById('efsetHistory');
+  const levels = ['A1','A2','B1','B1+','B2','C1'];
+  if (!s.efset.length) { el.innerHTML='<div style="font-size:12px;color:#6B7280">Aún no has registrado un resultado.</div>'; return; }
+  el.innerHTML = s.efset.map(e=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="background:#141D35;border:1px solid #4F8EF7;border-radius:8px;padding:6px 14px;font-size:14px;font-weight:800;color:#4F8EF7">${e.level}</div>
+      <div><div style="font-size:12px;color:#C4C9D4">Semana ${e.week}</div><div style="font-size:11px;color:#6B7280">${e.date}</div></div>
+      <div style="flex:1;background:#1C2230;border-radius:99px;height:8px;margin-left:6px">
+        <div style="width:${(levels.indexOf(e.level)+1)/levels.length*100}%;background:linear-gradient(90deg,#3B82F6,#8B5CF6);height:8px;border-radius:99px"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════
+// TAB: PLAN
+// ══════════════════════════════════════
+function renderPlan() {
+  const el = document.getElementById('planTimeline');
+  const s = getState();
+  el.innerHTML = PHASES.map(p=>{
+    const isActive = dayIndex >= p.days[0] && dayIndex <= p.days[1];
+    const isDone = dayIndex > p.days[1];
+    const totalPhaseDays = p.days[1]-p.days[0]+1;
+    const doneDays = Object.keys(s.done).filter(d=>+d>=p.days[0]&&+d<=p.days[1]).length;
+    const pct = Math.round(doneDays/totalPhaseDays*100);
+    return `
+    <div class="tl-item">
+      <div class="tl-dot ${isDone?'done-dot':isActive?'active':''}"></div>
+      <span class="tl-tag ${p.pill}" style="color:${p.color}">${p.label} · ${p.pillTxt}</span>
+      <div class="tl-title">${p.title}</div>
+      <div class="tl-sub" style="margin-bottom:8px">${p.focus}</div>
+      <div class="tl-sub" style="margin-bottom:10px">${p.description}</div>
+      ${isActive?`<div style="background:#1C2230;border-radius:99px;height:6px;margin-bottom:4px"><div style="width:${pct}%;background:${p.color};height:6px;border-radius:99px"></div></div><div style="font-size:11px;color:#6B7280;margin-bottom:8px">${doneDays}/${totalPhaseDays} días · ${pct}%</div>`:''}
+      <div style="background:#1A2030;border:1px solid #252A38;border-radius:10px;padding:12px;margin-bottom:4px">
+        <div style="font-size:11px;color:${p.color};font-weight:700;margin-bottom:4px">🎯 Meta de fase</div>
+        <div style="font-size:12px;color:#8B93A8;line-height:1.5">${p.milestone}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Resources
+  const rel = document.getElementById('resourceCards');
+  const phase = getPhase(Math.max(0,dayIndex));
+  rel.innerHTML = `<div style="font-size:12px;color:#8B93A8;margin-bottom:10px">Recursos para tu fase actual (${phase.label} · ${phase.title})</div>` +
+    phase.resources.map(r=>`<div class="card" style="margin-bottom:8px"><div class="card-body" style="padding:12px 16px;font-size:13px;color:#C4C9D4;display:flex;gap:8px;align-items:center"><span style="color:${phase.color}">›</span>${r}</div></div>`).join('');
+}
+
+// ══════════════════════════════════════
+// TAB: LOGROS
+// ══════════════════════════════════════
+const BADGES = [
+  {id:'day1',    icon:'🌱', name:'Primer paso',       sub:'Completa el día 1',         cond:s=>s.done[0]},
+  {id:'week1',   icon:'7️⃣', name:'Primera semana',    sub:'7 días completados',         cond:s=>completedCount()>=7},
+  {id:'streak7', icon:'🔥', name:'Racha de 7',        sub:'7 días seguidos',            cond:()=>currentStreak()>=7},
+  {id:'streak14',icon:'⚡', name:'Racha de 14',       sub:'14 días seguidos',           cond:()=>currentStreak()>=14},
+  {id:'phase1',  icon:'🎧', name:'Survival completo', sub:'Completa Fase 1 (28 días)',  cond:s=>dayIndex>27},
+  {id:'phase2',  icon:'💬', name:'Core completo',     sub:'Completa Fase 2 (42 días)',  cond:s=>dayIndex>69},
+  {id:'phase3',  icon:'🚀', name:'Fluency',           sub:'Completa Fase 3 (70 días)',  cond:s=>dayIndex>139},
+  {id:'phase4',  icon:'🏅', name:'Professional B2',  sub:'Completa los 252 días',      cond:s=>dayIndex>=251},
+  {id:'measure1',icon:'📊', name:'Primera medición',  sub:'Guarda tu primera autoevaluación', cond:s=>s.measures.length>=1},
+  {id:'efset1',  icon:'🌐', name:'EF SET registrado', sub:'Registra tu primer nivel',   cond:s=>s.efset.length>=1},
+  {id:'days30',  icon:'📅', name:'30 días',           sub:'30 días completados',        cond:s=>completedCount()>=30},
+  {id:'days100', icon:'💯', name:'100 días',          sub:'100 días completados',       cond:s=>completedCount()>=100},
+];
+
+function renderBadges() {
+  const s = getState();
+  const el = document.getElementById('badgesGrid');
+  const unlocked = BADGES.filter(b=>b.cond(s));
+  const locked   = BADGES.filter(b=>!b.cond(s));
+
+  el.innerHTML = `<div class="badges">${
+    BADGES.map(b=>{
+      const ok = b.cond(s);
+      return `<div class="badge ${ok?'unlocked':''}">
+        <div class="badge-icon" style="${ok?'':'filter:grayscale(1);opacity:.4'}">${b.icon}</div>
+        <div>
+          <div class="badge-name">${b.name}</div>
+          <div class="badge-sub">${ok?'✓ Desbloqueado':b.sub}</div>
+        </div>
+      </div>`;
+    }).join('')
+  }</div>`;
+
+  const nextEl = document.getElementById('nextMilestone');
+  const next = locked[0];
+  if (next) {
+    nextEl.innerHTML = `<div class="card-body"><div style="display:flex;align-items:center;gap:14px"><div style="font-size:36px">${next.icon}</div><div><div style="font-size:15px;font-weight:800;color:#fff">${next.name}</div><div style="font-size:13px;color:#6B7280;margin-top:4px">${next.sub}</div></div></div></div>`;
+  } else {
+    nextEl.innerHTML = `<div class="card-body" style="text-align:center;font-size:14px;color:#22C55E;font-weight:700;padding:20px">🏆 ¡Todos los logros desbloqueados!</div>`;
+  }
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+renderHoy();
+updateHeroStats();
+</script>
+</body>
+</html>
