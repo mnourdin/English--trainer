@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpeakUp A1 · English desde cero</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B0D14;--surface:#13161F;--surface2:#1A1E2C;--border:#222638;
+  --accent:#4F6EF7;--accent2:#7B93FF;--green:#1FCC6E;--red:#F05252;
+  --amber:#F5A623;--purple:#A855F7;--text:#E6E9F8;--muted:#5A6180;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex}
+
+/* TOP BAR */
+.topbar{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:50;border-bottom:1px solid var(--border)}
+.logo{font-size:17px;font-weight:900;letter-spacing:-0.3px}
+.logo span{color:var(--accent2)}
+.back-btn{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-family:inherit}
+
+/* PROGRESS STRIP */
+.pstrip{height:4px;background:var(--border)}
+.pfill{height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s ease}
+
+/* HOME */
+.home-hero{padding:28px 20px 16px;text-align:center}
+.home-hero h1{font-size:26px;font-weight:900;line-height:1.15;margin-bottom:6px}
+.home-hero h1 em{font-style:normal;color:var(--accent2)}
+.home-hero p{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+.xp-bar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:0 20px 16px;display:flex;align-items:center;gap:14px}
+.xp-ring{width:48px;height:48px;flex-shrink:0;position:relative}
+.xp-ring svg{transform:rotate(-90deg)}
+.level-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--accent2)}
+.xp-info{flex:1}
+.xp-level{font-size:14px;font-weight:800;color:var(--text)}
+.xp-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.xp-next{font-size:11px;color:var(--accent2);margin-top:4px}
+
+.stats-row{display:flex;gap:8px;padding:0 20px 16px;overflow-x:auto;scrollbar-width:none}
+.stats-row::-webkit-scrollbar{display:none}
+.sbox{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;flex-shrink:0;text-align:center;min-width:70px}
+.sbox-val{font-size:18px;font-weight:900;color:var(--accent2)}
+.sbox-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+
+/* WEEK PATH */
+.week-section{padding:0 20px;margin-bottom:16px}
+.week-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+.day-path{display:flex;flex-direction:column;gap:8px}
+.day-node{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;cursor:pointer;transition:all .2s;position:relative}
+.day-node.done{background:#0D2019;border-color:#1A4A2A}
+.day-node.active-day{border-color:var(--accent);background:#101628}
+.day-node.locked{opacity:.45;cursor:default}
+.day-node:not(.locked):not(.done):hover{border-color:var(--accent);transform:translateX(4px)}
+.day-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--surface2);border:2px solid var(--border)}
+.day-node.done .day-circle{background:#1A4A2A;border-color:var(--green)}
+.day-node.active-day .day-circle{background:#1A2548;border-color:var(--accent)}
+.day-info{flex:1}
+.day-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.day-sub{font-size:12px;color:var(--muted)}
+.day-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+.badge-done{background:#1A4A2A;color:var(--green)}
+.badge-active{background:#1A2548;color:var(--accent2)}
+.badge-locked{background:var(--surface2);color:var(--muted)}
+.day-xp{font-size:11px;color:var(--amber);font-weight:700;margin-top:2px}
+
+/* LESSON SCREEN */
+.lesson-body{flex:1;padding:20px;max-width:560px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:18px}
+
+/* ACTIVITY CARDS */
+.act-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.act-eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.act-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.act-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px;line-height:1.3}
+.act-sub{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* VOCAB CARD */
+.vocab-word{font-size:42px;font-weight:900;color:var(--text);text-align:center;padding:20px 0 8px;letter-spacing:-1px}
+.vocab-pron{font-size:14px;color:var(--accent2);text-align:center;margin-bottom:6px;font-style:italic}
+.vocab-es{font-size:18px;color:var(--muted);text-align:center;margin-bottom:16px}
+.vocab-example{background:var(--surface2);border-radius:12px;padding:14px;text-align:center}
+.vocab-ex-en{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+.vocab-ex-es{font-size:13px;color:var(--muted)}
+.vocab-nav{display:flex;gap:10px;margin-top:14px}
+
+/* PHRASE BUILDER */
+.phrase-target{font-size:16px;font-weight:700;color:var(--accent2);text-align:center;padding:14px;background:var(--surface2);border-radius:12px;margin-bottom:14px;line-height:1.4}
+.phrase-translation{font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px}
+.word-bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px}
+.word-chip{padding:8px 14px;border-radius:99px;border:1px solid var(--border);background:var(--surface2);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text)}
+.word-chip:hover:not(.used){border-color:var(--accent);color:var(--accent2)}
+.word-chip.used{opacity:.3;cursor:default}
+.word-chip.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+.answer-slots{min-height:48px;background:var(--bg);border:2px dashed var(--border);border-radius:12px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.answer-word{padding:6px 12px;border-radius:8px;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.answer-placeholder{font-size:13px;color:var(--muted);font-style:italic}
+
+/* LISTEN & CHOOSE */
+.audio-btn{width:72px;height:72px;border-radius:50%;background:var(--accent);border:none;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;transition:transform .15s}
+.audio-btn:active{transform:scale(.92)}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice-btn{padding:14px 18px;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-align:left;font-family:inherit}
+.choice-btn:hover:not(.answered){border-color:var(--accent);color:var(--accent2)}
+.choice-btn.correct{background:#0D2019;border-color:var(--green);color:var(--green)}
+.choice-btn.wrong{background:#200D0D;border-color:var(--red);color:var(--red)}
+
+/* SPEAK */
+.speak-prompt{font-size:22px;font-weight:800;color:var(--accent2);text-align:center;padding:16px;line-height:1.3}
+.speak-es{font-size:14px;color:var(--muted);text-align:center;margin-bottom:20px}
+.mic-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.mic-btn{width:80px;height:80px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);font-size:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mic-btn.rec{background:var(--red);border-color:var(--red);animation:rpulse 1s infinite}
+@keyframes rpulse{0%,100%{box-shadow:0 0 0 0 rgba(240,82,82,.4)}50%{box-shadow:0 0 0 14px rgba(240,82,82,0)}}
+.mic-hint{font-size:12px;color:var(--muted)}
+.transcript-display{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 14px;min-height:48px;font-size:14px;color:var(--text);line-height:1.5;margin-top:8px;text-align:center;font-style:italic}
+
+/* FEEDBACK INLINE */
+.fb-box{border-radius:14px;padding:16px;margin-top:4px;animation:fadeUp .3s ease}
+.fb-box.good{background:#0D2019;border:1px solid #1A4A2A}
+.fb-box.ok{background:#231A08;border:1px solid #3D2F0A}
+.fb-box.bad{background:#200D0D;border:1px solid #3D1010}
+.fb-emoji{font-size:24px;margin-bottom:8px}
+.fb-title{font-size:14px;font-weight:800;margin-bottom:4px}
+.fb-good .fb-title{color:var(--green)}
+.fb-ok .fb-title{color:var(--amber)}
+.fb-bad .fb-title{color:var(--red)}
+.fb-text{font-size:13px;color:var(--muted);line-height:1.5}
+.fb-correct{font-size:13px;color:var(--green);font-weight:600;margin-top:6px}
+
+/* BOTTOM NAV */
+.bottom-act{position:fixed;bottom:0;left:0;right:0;padding:12px 20px 24px;background:var(--bg);border-top:1px solid var(--border);display:flex;gap:10px;max-width:560px;margin:0 auto}
+.btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-primary:disabled{opacity:.4;cursor:default}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-green{background:var(--green);color:#000;font-weight:800}
+
+/* RESULT */
+.result-wrap{flex:1;padding:28px 20px;max-width:560px;margin:0 auto;width:100%;text-align:center}
+.result-circle{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--green));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:36px;font-weight:900;color:#fff}
+.result-title{font-size:22px;font-weight:900;margin-bottom:6px}
+.result-sub{font-size:14px;color:var(--muted);margin-bottom:24px}
+.result-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px}
+.rstat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
+.rstat-val{font-size:22px;font-weight:900;color:var(--accent2)}
+.rstat-lbl{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+.learned-list{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:left;margin-bottom:16px}
+.learned-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.learned-item:last-child{border-bottom:none}
+.learned-en{font-size:14px;font-weight:700;color:var(--text);flex:1}
+.learned-es{font-size:13px;color:var(--muted)}
+
+/* TOAST & XP */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(40px);background:var(--green);color:#000;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:999;transition:transform .3s;white-space:nowrap;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.xp-pop{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:14px 28px;border-radius:18px;font-size:22px;font-weight:900;z-index:1000;pointer-events:none;transition:all .25s}
+.xp-pop.show{transform:translate(-50%,-60%) scale(1)}
+.xp-pop.hide{transform:translate(-50%,-80%) scale(.8);opacity:0}
+
+.dots{display:inline-flex;gap:4px;align-items:center}
+.dots span{width:6px;height:6px;border-radius:50%;background:var(--accent2);animation:dot-blink 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot-blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div id="s-home" class="screen active">
+  <div class="topbar">
+    <div class="logo">Speak<span>Up</span> <span style="font-size:11px;color:var(--muted);font-weight:600">A1→B1</span></div>
+    <div style="font-size:12px;font-weight:700;color:var(--amber)">⚡ <span id="hXP">0</span> XP</div>
+  </div>
+
+  <div class="home-hero">
+    <h1>Tu camino al<br><em>English básico</em></h1>
+    <p>30 min al día · 60 días · De cero a conversación real</p>
+  </div>
+
+  <div class="xp-bar-wrap">
+    <div class="xp-ring">
+      <svg width="48" height="48" viewBox="0 0 48 48">
+        <circle class="ring-bg" cx="24" cy="24" r="20" fill="none" stroke="var(--border)" stroke-width="6"/>
+        <circle id="xpRingFg" cx="24" cy="24" r="20" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6"/>
+      </svg>
+      <div class="level-badge" id="levelBadge">A1</div>
+    </div>
+    <div class="xp-info">
+      <div class="xp-level" id="levelLabel">Nivel A1 — Principiante</div>
+      <div class="xp-sub" id="xpSubLabel">0 / 200 XP para A1+</div>
+      <div style="margin-top:6px;background:var(--border);border-radius:99px;height:5px">
+        <div id="xpBarFill" style="height:5px;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .6s"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="sbox"><div class="sbox-val" id="hStreak">0</div><div class="sbox-lbl">Racha</div></div>
+    <div class="sbox"><div class="sbox-val" id="hDays">0</div><div class="sbox-lbl">Días</div></div>
+    <div class="sbox"><div class="sbox-val" id="hWords">0</div><div class="sbox-lbl">Palabras</div></div>
+    <div class="sbox"><div class="sbox-val" id="hPhrases">0</div><div class="sbox-lbl">Frases</div></div>
+  </div>
+
+  <div class="week-section">
+    <div class="week-label" id="weekLabel">Semana 1 — Saludos y presentación</div>
+    <div class="day-path" id="dayPath"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ LESSON ═══════════════ -->
+<div id="s-lesson" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div style="font-size:13px;font-weight:700;flex:1;text-align:center" id="lessonTitle">Día 1</div>
+    <div style="font-size:12px;color:var(--muted);font-family:monospace" id="actCount">1/5</div>
+  </div>
+  <div class="pstrip"><div class="pfill" id="pFill" style="width:0%"></div></div>
+  <div class="lesson-body" id="lessonBody"></div>
+  <div class="bottom-act">
+    <button class="btn btn-ghost" id="btnSkip" onclick="skipActivity()">Saltar</button>
+    <button class="btn btn-primary" id="btnNext" onclick="nextActivity()" disabled>Continuar</button>
+  </div>
+</div>
+
+<!-- ═══════════════ RESULT ═══════════════ -->
+<div id="s-result" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div style="font-size:13px;font-weight:700">Lección completada</div>
+    <div></div>
+  </div>
+  <div class="result-wrap">
+    <div class="result-circle" id="rCircle">🎉</div>
+    <div class="result-title" id="rTitle">¡Excelente!</div>
+    <div class="result-sub" id="rSub">Completaste el día 1</div>
+    <div class="result-stats">
+      <div class="rstat"><div class="rstat-val" id="rXP">0</div><div class="rstat-lbl">XP ganado</div></div>
+      <div class="rstat"><div class="rstat-val" id="rWords">0</div><div class="rstat-lbl">Palabras</div></div>
+      <div class="rstat"><div class="rstat-val" id="rCorrect">0%</div><div class="rstat-lbl">Aciertos</div></div>
+    </div>
+    <div class="learned-list" id="learnedList"></div>
+    <button class="btn btn-green" onclick="goHome()" style="margin-bottom:10px">Volver al inicio ✓</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="xp-pop" id="xpPop">+10 XP</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CURRICULUM — 60 días, progresión A1 → B1
+// ═══════════════════════════════════════════
+const WEEKS = [
+  { label:'Semana 1 — Saludos y presentación', days:[
+    { title:'Hello & Hi', emoji:'👋', sub:'Saludos básicos', xp:30,
+      acts:[
+        {type:'vocab', words:[
+          {en:'Hello',pron:'/həˈloʊ/',es:'Hola',ex_en:'Hello! How are you?',ex_es:'¡Hola! ¿Cómo estás?'},
+          {en:'Hi',pron:'/haɪ/',es:'Hola (informal)',ex_en:'Hi! I\'m Miguel.',ex_es:'¡Hola! Soy Miguel.'},
+          {en:'Good morning',pron:'/ɡʊd ˈmɔːrnɪŋ/',es:'Buenos días',ex_en:'Good morning, everyone!',ex_es:'¡Buenos días a todos!'},
+          {en:'Good afternoon',pron:'/ɡʊd ˌæftərˈnuːn/',es:'Buenas tardes',ex_en:'Good afternoon, how can I help?',ex_es:'Buenas tardes, ¿cómo puedo ayudar?'},
+          {en:'Goodbye',pron:'/ˌɡʊdˈbaɪ/',es:'Adiós',ex_en:'Goodbye! See you tomorrow.',ex_es:'¡Adiós! Hasta mañana.'},
+        ]},
+        {type:'build', es:'Hola, me llamo Miguel', answer:['Hi,','my','name','is','Miguel'], bank:['Hi,','my','name','is','Miguel','Good','morning','Hello']},
+        {type:'choose', question:'¿Cómo dices "Buenos días" en inglés?', audio_text:'Good morning', options:['Good morning','Good night','Good evening','Hello night'], correct:0},
+        {type:'speak', phrase:'Hello, my name is Miguel', es:'Hola, mi nombre es Miguel', tip:'Di tu nombre real al practicar'},
+        {type:'speak', phrase:'Good morning! How are you?', es:'¡Buenos días! ¿Cómo estás?', tip:'Sube un poco el tono al final de la pregunta'},
+      ]
+    },
+    { title:'My name is…', emoji:'🙋', sub:'Presentarte', xp:35,
+      acts:[
+        {type:'vocab', words:[
+          {en:'I am',pron:'/aɪ æm/',es:'Yo soy / Yo estoy',ex_en:'I am Miguel.',ex_es:'Yo soy Miguel.'},
+          {en:'My name is',pron:'/maɪ neɪm ɪz/',es:'Mi nombre es',ex_en:'My name is Miguel.',ex_es:'Mi nombre es Miguel.'},
+          {en:'Nice to meet you',pron:'/naɪs tə miːt juː/',es:'Mucho gusto',ex_en:'Nice to meet you, Anna.',ex_es:'Mucho gusto, Anna.'},
+          {en:'I\'m from',pron:'/aɪm frɒm/',es:'Soy de',ex_en:'I\'m from Chile.',ex_es:'Soy de Chile.'},
+          {en:'I work at',pron:'/aɪ wɜːrk æt/',es:'Trabajo en',ex_en:'I work at Colbún.',ex_es:'Trabajo en Colbún.'},
+        ]},
+        {type:'build', es:'Mucho gusto, soy de Chile', answer:['Nice','to','meet','you,','I\'m','from','Chile'], bank:['Nice','to','meet','you,','I\'m','from','Chile','Hello','name']},
+        {type:'choose', question:'¿Qué significa "Nice to meet you"?', audio_text:'Nice to meet you', options:['Adiós','Mucho gusto','Buenas noches','¿Cómo te llamas?'], correct:1},
+        {type:'speak', phrase:'My name is Miguel. Nice to meet you.', es:'Mi nombre es Miguel. Mucho gusto.', tip:'Pausa entre las dos frases'},
+        {type:'speak', phrase:'I am from Chile. I work in technology.', es:'Soy de Chile. Trabajo en tecnología.', tip:'Habla despacio, cada palabra clara'},
+      ]
+    },
+    { title:'How are you?', emoji:'😊', sub:'Preguntar cómo están', xp:35,
+      acts:[
+        {type:'vocab', words:[
+          {en:'How are you?',pron:'/haʊ ɑːr juː/',es:'¿Cómo estás?',ex_en:'How are you today?',ex_es:'¿Cómo estás hoy?'},
+          {en:'I\'m fine',pron:'/aɪm faɪn/',es:'Estoy bien',ex_en:'I\'m fine, thank you!',ex_es:'Estoy bien, ¡gracias!'},
+          {en:'Very good',pron:'/ˈveri ɡʊd/',es:'Muy bien',ex_en:'I\'m very good today.',ex_es:'Estoy muy bien hoy.'},
+          {en:'Thank you',pron:'/θæŋk juː/',es:'Gracias',ex_en:'Thank you very much!',ex_es:'¡Muchas gracias!'},
+          {en:'And you?',pron:'/ænd juː/',es:'¿Y tú?',ex_en:'I\'m fine. And you?',ex_es:'Estoy bien. ¿Y tú?'},
+        ]},
+        {type:'build', es:'Estoy bien, gracias. ¿Y tú?', answer:['I\'m','fine,','thank','you.','And','you?'], bank:['I\'m','fine,','thank','you.','And','you?','Hello','Good']},
+        {type:'choose', question:'¿Qué respondo a "How are you?"', audio_text:'How are you?', options:['My name is Miguel','I\'m fine, thank you!','Good morning','Nice to meet you'], correct:1},
+        {type:'speak', phrase:'I\'m fine, thank you! And you?', es:'Estoy bien, ¡gracias! ¿Y tú?', tip:'Sube el tono en "And you?" — es pregunta'},
+        {type:'speak', phrase:'Very good! How are you today?', es:'¡Muy bien! ¿Cómo estás hoy?', tip:''},
+      ]
+    },
+    { title:'Numbers 1–10', emoji:'🔢', sub:'Números básicos', xp:30,
+      acts:[
+        {type:'vocab', words:[
+          {en:'One, Two, Three',pron:'/wʌn tuː θriː/',es:'Uno, Dos, Tres',ex_en:'I have three meetings today.',ex_es:'Tengo tres reuniones hoy.'},
+          {en:'Four, Five, Six',pron:'/fɔːr faɪv sɪks/',es:'Cuatro, Cinco, Seis',ex_en:'The meeting is at four.',ex_es:'La reunión es a las cuatro.'},
+          {en:'Seven, Eight, Nine',pron:'/ˈsevən eɪt naɪn/',es:'Siete, Ocho, Nueve',ex_en:'We have nine people in the team.',ex_es:'Tenemos nueve personas en el equipo.'},
+          {en:'Ten',pron:'/ten/',es:'Diez',ex_en:'I need ten minutes.',ex_es:'Necesito diez minutos.'},
+          {en:'How many?',pron:'/haʊ ˈmeni/',es:'¿Cuántos?',ex_en:'How many people are in the meeting?',ex_es:'¿Cuántas personas hay en la reunión?'},
+        ]},
+        {type:'build', es:'Necesito cinco minutos', answer:['I','need','five','minutes'], bank:['I','need','five','minutes','three','ten','have']},
+        {type:'choose', question:'¿Qué número es "eight"?', audio_text:'eight', options:['6','7','8','9'], correct:2},
+        {type:'speak', phrase:'I need five minutes, please.', es:'Necesito cinco minutos, por favor.', tip:''},
+        {type:'speak', phrase:'We have ten people in the team.', es:'Tenemos diez personas en el equipo.', tip:''},
+      ]
+    },
+    { title:'Yes / No / Please', emoji:'✅', sub:'Respuestas esenciales', xp:30,
+      acts:[
+        {type:'vocab', words:[
+          {en:'Yes',pron:'/jes/',es:'Sí',ex_en:'Yes, I understand.',ex_es:'Sí, entiendo.'},
+          {en:'No',pron:'/noʊ/',es:'No',ex_en:'No, I don\'t know.',ex_es:'No, no sé.'},
+          {en:'Please',pron:'/pliːz/',es:'Por favor',ex_en:'Please send the email.',ex_es:'Por favor envía el correo.'},
+          {en:'Sorry',pron:'/ˈsɒri/',es:'Lo siento / Perdón',ex_en:'Sorry, I don\'t understand.',ex_es:'Lo siento, no entiendo.'},
+          {en:'I don\'t understand',pron:'/aɪ doʊnt ˌʌndərˈstænd/',es:'No entiendo',ex_en:'Sorry, I don\'t understand. Can you repeat?',ex_es:'Lo siento, no entiendo. ¿Puedes repetir?'},
+        ]},
+        {type:'build', es:'Lo siento, no entiendo', answer:['Sorry,','I','don\'t','understand'], bank:['Sorry,','I','don\'t','understand','Yes','No','Please']},
+        {type:'choose', question:'¿Cómo dices "Por favor" en inglés?', audio_text:'Please', options:['Sorry','Please','Thank you','Yes'], correct:1},
+        {type:'speak', phrase:'Sorry, I don\'t understand. Please repeat.', es:'Lo siento, no entiendo. Por favor repite.', tip:'Esta frase te salva en cualquier conversación'},
+        {type:'speak', phrase:'Yes, I understand. Thank you!', es:'Sí, entiendo. ¡Gracias!', tip:''},
+      ]
+    },
+    { title:'Repaso Semana 1', emoji:'🔄', sub:'Practica todo lo aprendido', xp:50,
+      acts:[
+        {type:'speak', phrase:'Hello! My name is Miguel. I\'m from Chile.', es:'¡Hola! Mi nombre es Miguel. Soy de Chile.', tip:'Combina todo lo que aprendiste'},
+        {type:'build', es:'Mucho gusto, ¿cómo estás?', answer:['Nice','to','meet','you,','how','are','you?'], bank:['Nice','to','meet','you,','how','are','you?','I\'m','fine']},
+        {type:'choose', question:'¿Cómo completas? "I\'m fine, ___ you."', audio_text:'I\'m fine, thank you.', options:['sorry','please','thank','nice'], correct:2},
+        {type:'speak', phrase:'I\'m fine, thank you! And you?', es:'Estoy bien, ¡gracias! ¿Y tú?', tip:''},
+        {type:'speak', phrase:'Sorry, I don\'t understand. Can you repeat, please?', es:'Lo siento, no entiendo. ¿Puedes repetir, por favor?', tip:'Frase de supervivencia — practica hasta dominarla'},
+      ]
+    },
+    { title:'Días de la semana', emoji:'📅', sub:'Days of the week', xp:35,
+      acts:[
+        {type:'vocab', words:[
+          {en:'Monday',pron:'/ˈmʌndeɪ/',es:'Lunes',ex_en:'The meeting is on Monday.',ex_es:'La reunión es el lunes.'},
+          {en:'Tuesday / Wednesday',pron:'/ˈtjuːzdeɪ / ˈwenzdeɪ/',es:'Martes / Miércoles',ex_en:'I work on Tuesday and Wednesday.',ex_es:'Trabajo el martes y el miércoles.'},
+          {en:'Thursday / Friday',pron:'/ˈθɜːrzdeɪ / ˈfraɪdeɪ/',es:'Jueves / Viernes',ex_en:'Friday is my favorite day.',ex_es:'El viernes es mi día favorito.'},
+          {en:'Today / Tomorrow',pron:'/təˈdeɪ / təˈmɒroʊ/',es:'Hoy / Mañana',ex_en:'Today is Monday. Tomorrow is Tuesday.',ex_es:'Hoy es lunes. Mañana es martes.'},
+          {en:'This week',pron:'/ðɪs wiːk/',es:'Esta semana',ex_en:'This week I have five meetings.',ex_es:'Esta semana tengo cinco reuniones.'},
+        ]},
+        {type:'build', es:'Hoy es lunes, mañana es martes', answer:['Today','is','Monday,','tomorrow','is','Tuesday'], bank:['Today','is','Monday,','tomorrow','is','Tuesday','Friday','week']},
+        {type:'choose', question:'¿Qué día es "Wednesday"?', audio_text:'Wednesday', options:['Martes','Miércoles','Jueves','Viernes'], correct:1},
+        {type:'speak', phrase:'Today is Monday. I have a meeting.', es:'Hoy es lunes. Tengo una reunión.', tip:''},
+        {type:'speak', phrase:'This week I work on Monday, Wednesday and Friday.', es:'Esta semana trabajo el lunes, miércoles y viernes.', tip:''},
+      ]
+    },
+  ]},
+  { label:'Semana 2 — Trabajo y rutinas', days:[
+    { title:'I work / I have', emoji:'💼', sub:'Hablar de tu trabajo', xp:40,
+      acts:[
+        {type:'vocab', words:[
+          {en:'I work',pron:'/aɪ wɜːrk/',es:'Yo trabajo',ex_en:'I work in technology.',ex_es:'Trabajo en tecnología.'},
+          {en:'I have',pron:'/aɪ hæv/',es:'Yo tengo',ex_en:'I have a meeting at three.',ex_es:'Tengo una reunión a las tres.'},
+          {en:'I need',pron:'/aɪ niːd/',es:'Yo necesito',ex_en:'I need your help.',ex_es:'Necesito tu ayuda.'},
+          {en:'Meeting',pron:'/ˈmiːtɪŋ/',es:'Reunión',ex_en:'The meeting is at two o\'clock.',ex_es:'La reunión es a las dos.'},
+          {en:'Email',pron:'/ˈiːmeɪl/',es:'Correo electrónico',ex_en:'Please send me the email.',ex_es:'Por favor envíame el correo.'},
+        ]},
+        {type:'build', es:'Trabajo en tecnología y tengo una reunión', answer:['I','work','in','technology','and','I','have','a','meeting'], bank:['I','work','in','technology','and','I','have','a','meeting','need']},
+        {type:'choose', question:'¿Qué significa "I need your help"?', audio_text:'I need your help', options:['Tengo tu ayuda','Necesito tu ayuda','Quiero tu ayuda','Trabajo con tu ayuda'], correct:1},
+        {type:'speak', phrase:'I work in technology. I have a meeting today.', es:'Trabajo en tecnología. Tengo una reunión hoy.', tip:''},
+        {type:'speak', phrase:'I need five minutes, please.', es:'Necesito cinco minutos, por favor.', tip:''},
+      ]
+    },
+    { title:'Morning routine', emoji:'☀️', sub:'Tu rutina de mañana', xp:40,
+      acts:[
+        {type:'vocab', words:[
+          {en:'I wake up',pron:'/aɪ weɪk ʌp/',es:'Me despierto',ex_en:'I wake up at seven.',ex_es:'Me despierto a las siete.'},
+          {en:'I go to work',pron:'/aɪ ɡoʊ tə wɜːrk/',es:'Voy al trabajo',ex_en:'I go to work at eight.',ex_es:'Voy al trabajo a las ocho.'},
+          {en:'In the morning',pron:'/ɪn ðə ˈmɔːrnɪŋ/',es:'En la mañana',ex_en:'In the morning I drink coffee.',ex_es:'En la mañana tomo café.'},
+          {en:'Every day',pron:'/ˈevri deɪ/',es:'Todos los días',ex_en:'Every day I check my email.',ex_es:'Todos los días reviso mi correo.'},
+          {en:'At (time)',pron:'/æt/',es:'A las (hora)',ex_en:'The meeting is at nine.',ex_es:'La reunión es a las nueve.'},
+        ]},
+        {type:'build', es:'Me despierto a las siete todos los días', answer:['I','wake','up','at','seven','every','day'], bank:['I','wake','up','at','seven','every','day','morning','go']},
+        {type:'choose', question:'¿Qué significa "I go to work at eight"?', audio_text:'I go to work at eight', options:['Trabajo hasta las ocho','Voy al trabajo a las ocho','Me despierto a las ocho','Termino a las ocho'], correct:1},
+        {type:'speak', phrase:'I wake up at seven. In the morning I drink coffee.', es:'Me despierto a las siete. En la mañana tomo café.', tip:''},
+        {type:'speak', phrase:'I go to work at eight every day.', es:'Voy al trabajo a las ocho todos los días.', tip:''},
+      ]
+    },
+    { title:'Can you…? / I can', emoji:'💪', sub:'Habilidades y peticiones', xp:40,
+      acts:[
+        {type:'vocab', words:[
+          {en:'I can',pron:'/aɪ kæn/',es:'Yo puedo',ex_en:'I can help you.',ex_es:'Yo puedo ayudarte.'},
+          {en:'Can you…?',pron:'/kæn juː/',es:'¿Puedes…?',ex_en:'Can you send the file?',ex_es:'¿Puedes enviar el archivo?'},
+          {en:'I can\'t',pron:'/aɪ kɑːnt/',es:'No puedo',ex_en:'I can\'t come to the meeting.',ex_es:'No puedo ir a la reunión.'},
+          {en:'Help',pron:'/help/',es:'Ayuda / Ayudar',ex_en:'Can you help me, please?',ex_es:'¿Puedes ayudarme, por favor?'},
+          {en:'Send',pron:'/send/',es:'Enviar',ex_en:'Please send me the document.',ex_es:'Por favor envíame el documento.'},
+        ]},
+        {type:'build', es:'¿Puedes ayudarme, por favor?', answer:['Can','you','help','me,','please?'], bank:['Can','you','help','me,','please?','I','can\'t','send']},
+        {type:'choose', question:'¿Cómo dices "No puedo ir a la reunión"?', audio_text:'I can\'t come to the meeting', options:['I can come to the meeting','Can you come?','I can\'t come to the meeting','I need the meeting'], correct:2},
+        {type:'speak', phrase:'I can help you. Can you send the document?', es:'Yo puedo ayudarte. ¿Puedes enviar el documento?', tip:''},
+        {type:'speak', phrase:'I can\'t come to the meeting. Sorry.', es:'No puedo ir a la reunión. Lo siento.', tip:'Útil en el trabajo — apréndetela'},
+      ]
+    },
+    { title:'Where is…?', emoji:'📍', sub:'Ubicación y lugares', xp:35,
+      acts:[
+        {type:'vocab', words:[
+          {en:'Where is…?',pron:'/wer ɪz/',es:'¿Dónde está…?',ex_en:'Where is the office?',ex_es:'¿Dónde está la oficina?'},
+          {en:'Here / There',pron:'/hɪr / ðer/',es:'Aquí / Allí',ex_en:'The file is here.',ex_es:'El archivo está aquí.'},
+          {en:'Next to',pron:'/nekst tuː/',es:'Al lado de',ex_en:'My desk is next to the window.',ex_es:'Mi escritorio está al lado de la ventana.'},
+          {en:'Office',pron:'/ˈɒfɪs/',es:'Oficina',ex_en:'I work in the office on Mondays.',ex_es:'Trabajo en la oficina los lunes.'},
+          {en:'At home',pron:'/æt hoʊm/',es:'En casa',ex_en:'Today I work at home.',ex_es:'Hoy trabajo en casa.'},
+        ]},
+        {type:'build', es:'Hoy trabajo en casa', answer:['Today','I','work','at','home'], bank:['Today','I','work','at','home','office','here','there']},
+        {type:'choose', question:'¿Qué significa "Where is the office?"?', audio_text:'Where is the office?', options:['¿Cuándo es la oficina?','¿Quién está en la oficina?','¿Dónde está la oficina?','¿Cómo es la oficina?'], correct:2},
+        {type:'speak', phrase:'I work at home today. The meeting is at nine.', es:'Hoy trabajo en casa. La reunión es a las nueve.', tip:''},
+        {type:'speak', phrase:'Where is the office? It is next to the main building.', es:'¿Dónde está la oficina? Está al lado del edificio principal.', tip:''},
+      ]
+    },
+    { title:'Do you like…?', emoji:'❤️', sub:'Gustos y preferencias', xp:40,
+      acts:[
+        {type:'vocab', words:[
+          {en:'I like',pron:'/aɪ laɪk/',es:'Me gusta',ex_en:'I like my job.',ex_es:'Me gusta mi trabajo.'},
+          {en:'I don\'t like',pron:'/aɪ doʊnt laɪk/',es:'No me gusta',ex_en:'I don\'t like waking up early.',ex_es:'No me gusta levantarme temprano.'},
+          {en:'Do you like…?',pron:'/duː juː laɪk/',es:'¿Te gusta…?',ex_en:'Do you like working from home?',ex_es:'¿Te gusta trabajar desde casa?'},
+          {en:'Very much',pron:'/ˈveri mʌtʃ/',es:'Mucho',ex_en:'I like coffee very much.',ex_es:'Me gusta mucho el café.'},
+          {en:'A little',pron:'/ə ˈlɪtl/',es:'Un poco',ex_en:'I speak English a little.',ex_es:'Hablo inglés un poco.'},
+        ]},
+        {type:'build', es:'Me gusta mucho mi trabajo', answer:['I','like','my','job','very','much'], bank:['I','like','my','job','very','much','don\'t','little']},
+        {type:'choose', question:'¿Cómo preguntas si le gusta trabajar desde casa?', audio_text:'Do you like working from home?', options:['You like work home?','Do you like working from home?','I like home work?','Where you work?'], correct:1},
+        {type:'speak', phrase:'I like my job. I work in technology very much.', es:'Me gusta mi trabajo. Me gusta mucho trabajar en tecnología.', tip:''},
+        {type:'speak', phrase:'Do you like working from home? I like it a little.', es:'¿Te gusta trabajar desde casa? Me gusta un poco.', tip:''},
+      ]
+    },
+    { title:'Repaso Semana 2', emoji:'🔄', sub:'Consolida lo aprendido', xp:50,
+      acts:[
+        {type:'speak', phrase:'I work in technology. I wake up at seven every day.', es:'Trabajo en tecnología. Me despierto a las siete todos los días.', tip:''},
+        {type:'build', es:'¿Puedes enviarme el correo, por favor?', answer:['Can','you','send','me','the','email,','please?'], bank:['Can','you','send','me','the','email,','please?','I','need']},
+        {type:'choose', question:'¿Cómo dices "Me gusta un poco"?', audio_text:'I like it a little', options:['I like it very much','I like it a little','I don\'t like it','I need a little'], correct:1},
+        {type:'speak', phrase:'Today I work at home. I have a meeting at ten.', es:'Hoy trabajo en casa. Tengo una reunión a las diez.', tip:''},
+        {type:'speak', phrase:'I like my work very much. Can you help me, please?', es:'Me gusta mucho mi trabajo. ¿Puedes ayudarme, por favor?', tip:''},
+      ]
+    },
+    { title:'What time is it?', emoji:'🕐', sub:'La hora', xp:40,
+      acts:[
+        {type:'vocab', words:[
+          {en:'What time is it?',pron:'/wɒt taɪm ɪz ɪt/',es:'¿Qué hora es?',ex_en:'Excuse me, what time is it?',ex_es:'Disculpa, ¿qué hora es?'},
+          {en:'It\'s (time) o\'clock',pron:'/ɪts ... əˈklɒk/',es:'Son las… en punto',ex_en:'It\'s nine o\'clock.',ex_es:'Son las nueve en punto.'},
+          {en:'Half past',pron:'/hɑːf pɑːst/',es:'Y media',ex_en:'It\'s half past two.',ex_es:'Son las dos y media.'},
+          {en:'In the afternoon',pron:'/ɪn ðə ˌæftəˈnuːn/',es:'En la tarde',ex_en:'The meeting is in the afternoon.',ex_es:'La reunión es en la tarde.'},
+          {en:'At night',pron:'/æt naɪt/',es:'En la noche',ex_en:'I study English at night.',ex_es:'Estudio inglés en la noche.'},
+        ]},
+        {type:'build', es:'Son las nueve en punto', answer:['It\'s','nine','o\'clock'], bank:['It\'s','nine','o\'clock','seven','half','past','What','time']},
+        {type:'choose', question:'¿Cómo dices "Son las dos y media"?', audio_text:'It\'s half past two', options:['It\'s two o\'clock','It\'s half past one','It\'s half past two','It\'s past two'], correct:2},
+        {type:'speak', phrase:'What time is it? It\'s nine o\'clock.', es:'¿Qué hora es? Son las nueve en punto.', tip:''},
+        {type:'speak', phrase:'I study English at night. Every day!', es:'Estudio inglés en la noche. ¡Todos los días!', tip:''},
+      ]
+    },
+  ]},
+  { label:'Semana 3 — Conversación en el trabajo', days:[
+    { title:'I am / You are / He is', emoji:'👥', sub:'Pronombres y verbo to be', xp:45,
+      acts:[
+        {type:'vocab', words:[
+          {en:'I am / I\'m',pron:'/aɪ æm/',es:'Yo soy / estoy',ex_en:'I\'m a technology professional.',ex_es:'Soy un profesional de tecnología.'},
+          {en:'You are / You\'re',pron:'/juː ɑːr/',es:'Tú eres / estás',ex_en:'You\'re in the right meeting.',ex_es:'Estás en la reunión correcta.'},
+          {en:'He is / She is',pron:'/hiː ɪz / ʃiː ɪz/',es:'Él es / Ella es',ex_en:'She is my manager.',ex_es:'Ella es mi jefa.'},
+          {en:'We are',pron:'/wiː ɑːr/',es:'Nosotros somos / estamos',ex_en:'We are a good team.',ex_es:'Somos un buen equipo.'},
+          {en:'They are',pron:'/ðeɪ ɑːr/',es:'Ellos son / están',ex_en:'They are in the office.',ex_es:'Ellos están en la oficina.'},
+        ]},
+        {type:'build', es:'Ella es mi jefa y nosotros somos un buen equipo', answer:['She','is','my','manager','and','we','are','a','good','team'], bank:['She','is','my','manager','and','we','are','a','good','team','They','He']},
+        {type:'choose', question:'¿Cómo dices "Ellos están en la oficina"?', audio_text:'They are in the office', options:['We are in the office','He is in the office','They are in the office','She is in the office'], correct:2},
+        {type:'speak', phrase:'I\'m a technology professional. We are a good team.', es:'Soy un profesional de tecnología. Somos un buen equipo.', tip:''},
+        {type:'speak', phrase:'She is my manager. He is very good at his job.', es:'Ella es mi jefa. Él es muy bueno en su trabajo.', tip:''},
+      ]
+    },
+    { title:'What do you do?', emoji:'🛠️', sub:'Describir tu trabajo', xp:45,
+      acts:[
+        {type:'vocab', words:[
+          {en:'What do you do?',pron:'/wɒt duː juː duː/',es:'¿A qué te dedicas?',ex_en:'What do you do for work?',ex_es:'¿A qué te dedicas en el trabajo?'},
+          {en:'I am a…',pron:'/aɪ æm ə/',es:'Soy un/una…',ex_en:'I am a software engineer.',ex_es:'Soy un ingeniero de software.'},
+          {en:'I work with',pron:'/aɪ wɜːrk wɪð/',es:'Trabajo con',ex_en:'I work with SAP systems.',ex_es:'Trabajo con sistemas SAP.'},
+          {en:'My team',pron:'/maɪ tiːm/',es:'Mi equipo',ex_en:'My team has eight people.',ex_es:'Mi equipo tiene ocho personas.'},
+          {en:'My job is',pron:'/maɪ dʒɒb ɪz/',es:'Mi trabajo es',ex_en:'My job is to integrate systems.',ex_es:'Mi trabajo es integrar sistemas.'},
+        ]},
+        {type:'build', es:'Mi trabajo es integrar sistemas con SAP', answer:['My','job','is','to','integrate','systems','with','SAP'], bank:['My','job','is','to','integrate','systems','with','SAP','team','work']},
+        {type:'choose', question:'¿Cómo preguntas a qué se dedica alguien?', audio_text:'What do you do?', options:['Where are you?','What do you do?','How are you?','Can you help?'], correct:1},
+        {type:'speak', phrase:'I work with technology systems. My team has eight people.', es:'Trabajo con sistemas de tecnología. Mi equipo tiene ocho personas.', tip:''},
+        {type:'speak', phrase:'What do you do? I am a technology engineer.', es:'¿A qué te dedicas? Soy un ingeniero de tecnología.', tip:''},
+      ]
+    },
+    { title:'In a meeting', emoji:'🎯', sub:'Frases para reuniones', xp:50,
+      acts:[
+        {type:'vocab', words:[
+          {en:'Can you repeat?',pron:'/kæn juː rɪˈpiːt/',es:'¿Puedes repetir?',ex_en:'Sorry, can you repeat that, please?',ex_es:'Lo siento, ¿puedes repetir eso, por favor?'},
+          {en:'I agree',pron:'/aɪ əˈɡriː/',es:'Estoy de acuerdo',ex_en:'I agree with your idea.',ex_es:'Estoy de acuerdo con tu idea.'},
+          {en:'Good idea',pron:'/ɡʊd aɪˈdɪə/',es:'Buena idea',ex_en:'That\'s a good idea!',ex_es:'¡Esa es una buena idea!'},
+          {en:'Can I ask a question?',pron:'/kæn aɪ ɑːsk ə ˈkwestʃən/',es:'¿Puedo hacer una pregunta?',ex_en:'Can I ask a question about the project?',ex_es:'¿Puedo hacer una pregunta sobre el proyecto?'},
+          {en:'Let me check',pron:'/let miː tʃek/',es:'Déjame revisar',ex_en:'Let me check my calendar.',ex_es:'Déjame revisar mi calendario.'},
+        ]},
+        {type:'build', es:'¿Puedo hacer una pregunta? Estoy de acuerdo con tu idea', answer:['Can','I','ask','a','question?','I','agree','with','your','idea'], bank:['Can','I','ask','a','question?','I','agree','with','your','idea','repeat','check']},
+        {type:'choose', question:'En una reunión, ¿cómo pides que repitan?', audio_text:'Can you repeat that, please?', options:['I agree','Can I ask?','Can you repeat that, please?','Good idea'], correct:2},
+        {type:'speak', phrase:'Can I ask a question? I don\'t understand.', es:'¿Puedo hacer una pregunta? No entiendo.', tip:'Frase esencial para reuniones en inglés'},
+        {type:'speak', phrase:'Good idea! I agree. Let me check the document.', es:'¡Buena idea! Estoy de acuerdo. Déjame revisar el documento.', tip:''},
+      ]
+    },
+    { title:'This / That / These', emoji:'👆', sub:'Demostrativos básicos', xp:40,
+      acts:[
+        {type:'vocab', words:[
+          {en:'This is',pron:'/ðɪs ɪz/',es:'Este/Esta es',ex_en:'This is my project.',ex_es:'Este es mi proyecto.'},
+          {en:'That is',pron:'/ðæt ɪz/',es:'Ese/Esa es',ex_en:'That is the server room.',ex_es:'Esa es la sala de servidores.'},
+          {en:'These are',pron:'/ðiːz ɑːr/',es:'Estos/Estas son',ex_en:'These are the documents.',ex_es:'Estos son los documentos.'},
+          {en:'The / A',pron:'/ðə / ə/',es:'El/La / Un/Una',ex_en:'The system and a server.',ex_es:'El sistema y un servidor.'},
+          {en:'My / Your / Our',pron:'/maɪ / jɔːr / aʊər/',es:'Mi / Tu / Nuestro',ex_en:'Our team is working on it.',ex_es:'Nuestro equipo está trabajando en eso.'},
+        ]},
+        {type:'build', es:'Este es mi proyecto y estos son los documentos', answer:['This','is','my','project','and','these','are','the','documents'], bank:['This','is','my','project','and','these','are','the','documents','That','Our']},
+        {type:'choose', question:'¿Cómo dices "Estos son los documentos"?', audio_text:'These are the documents', options:['This is the document','That is the document','These are the documents','Those are documents'], correct:2},
+        {type:'speak', phrase:'This is my project. These are the documents.', es:'Este es mi proyecto. Estos son los documentos.', tip:''},
+        {type:'speak', phrase:'Our team is working on this. That is a good result.', es:'Nuestro equipo está trabajando en esto. Ese es un buen resultado.', tip:''},
+      ]
+    },
+    { title:'I want / I would like', emoji:'🙏', sub:'Pedir cosas educadamente', xp:45,
+      acts:[
+        {type:'vocab', words:[
+          {en:'I want',pron:'/aɪ wɒnt/',es:'Quiero',ex_en:'I want to learn English.',ex_es:'Quiero aprender inglés.'},
+          {en:'I would like',pron:'/aɪ wʊd laɪk/',es:'Me gustaría (más formal)',ex_en:'I would like more information.',ex_es:'Me gustaría más información.'},
+          {en:'I need to',pron:'/aɪ niːd tə/',es:'Necesito',ex_en:'I need to send this report.',ex_es:'Necesito enviar este informe.'},
+          {en:'Can I have?',pron:'/kæn aɪ hæv/',es:'¿Me puedes dar?',ex_en:'Can I have the document, please?',ex_es:'¿Me puedes dar el documento, por favor?'},
+          {en:'More information',pron:'/mɔːr ɪnfərˈmeɪʃən/',es:'Más información',ex_en:'I need more information about this.',ex_es:'Necesito más información sobre esto.'},
+        ]},
+        {type:'build', es:'Me gustaría más información sobre el proyecto', answer:['I','would','like','more','information','about','the','project'], bank:['I','would','like','more','information','about','the','project','want','need']},
+        {type:'choose', question:'¿Qué es más formal: "I want" o "I would like"?', audio_text:'I would like more information, please', options:['I want — es más formal','I would like — es más formal','Son iguales','Ninguna es formal'], correct:1},
+        {type:'speak', phrase:'I would like more information, please.', es:'Me gustaría más información, por favor.', tip:'Usa "I would like" en el trabajo — suena más profesional'},
+        {type:'speak', phrase:'I need to send this report. Can I have the template?', es:'Necesito enviar este informe. ¿Me puedes dar la plantilla?', tip:''},
+      ]
+    },
+    { title:'Repaso Semana 3', emoji:'🔄', sub:'Practica conversación de trabajo', xp:60,
+      acts:[
+        {type:'speak', phrase:'Hi! I\'m Miguel. I work with technology systems.', es:'¡Hola! Soy Miguel. Trabajo con sistemas de tecnología.', tip:''},
+        {type:'build', es:'¿Puedes repetir? No entiendo muy bien', answer:['Can','you','repeat?','I','don\'t','understand','very','well'], bank:['Can','you','repeat?','I','don\'t','understand','very','well','agree','like']},
+        {type:'choose', question:'En una reunión ¿cómo dices "Buena idea, estoy de acuerdo"?', audio_text:'Good idea! I agree.', options:['Sorry, I can\'t','Good idea! I agree.','I need help','Can you repeat?'], correct:1},
+        {type:'speak', phrase:'I would like more information about this project. Can I ask a question?', es:'Me gustaría más información sobre este proyecto. ¿Puedo hacer una pregunta?', tip:''},
+        {type:'speak', phrase:'My team has eight people. We work with SAP systems every day.', es:'Mi equipo tiene ocho personas. Trabajamos con sistemas SAP todos los días.', tip:'Combina todo lo aprendido'},
+      ]
+    },
+    { title:'Feelings & State', emoji:'😌', sub:'Cómo te sientes', xp:40,
+      acts:[
+        {type:'vocab', words:[
+          {en:'I\'m happy',pron:'/aɪm ˈhæpi/',es:'Estoy feliz',ex_en:'I\'m happy with the results.',ex_es:'Estoy feliz con los resultados.'},
+          {en:'I\'m tired',pron:'/aɪm ˈtaɪərd/',es:'Estoy cansado',ex_en:'I\'m tired. It was a long day.',ex_es:'Estoy cansado. Fue un día largo.'},
+          {en:'I\'m busy',pron:'/aɪm ˈbɪzi/',es:'Estoy ocupado',ex_en:'I\'m busy right now.',ex_es:'Estoy ocupado ahora mismo.'},
+          {en:'I\'m ready',pron:'/aɪm ˈredi/',es:'Estoy listo',ex_en:'I\'m ready for the meeting.',ex_es:'Estoy listo para la reunión.'},
+          {en:'I\'m not sure',pron:'/aɪm nɒt ʃʊər/',es:'No estoy seguro',ex_en:'I\'m not sure about this.',ex_es:'No estoy seguro sobre esto.'},
+        ]},
+        {type:'build', es:'Estoy listo para la reunión pero estoy ocupado ahora', answer:['I\'m','ready','for','the','meeting','but','I\'m','busy','now'], bank:['I\'m','ready','for','the','meeting','but','I\'m','busy','now','tired','happy']},
+        {type:'choose', question:'¿Cómo dices "No estoy seguro sobre esto"?', audio_text:'I\'m not sure about this', options:['I\'m busy about this','I\'m not sure about this','I\'m ready about this','I\'m tired about this'], correct:1},
+        {type:'speak', phrase:'I\'m ready for the meeting. I\'m not sure about the time.', es:'Estoy listo para la reunión. No estoy seguro sobre la hora.', tip:''},
+        {type:'speak', phrase:'I\'m happy with this project but I\'m very busy.', es:'Estoy feliz con este proyecto pero estoy muy ocupado.', tip:''},
+      ]
+    },
+  ]},
+];
+
+// Flatten days
+const ALL_DAYS = WEEKS.flatMap((w,wi)=>w.days.map((d,di)=>({...d,weekIdx:wi,dayIdx:di,globalIdx:wi*7+di})));
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const LEVELS = [
+  {name:'A1',label:'Principiante',xpNeeded:0},
+  {name:'A1+',label:'A1 avanzado',xpNeeded:200},
+  {name:'A2',label:'Elemental',xpNeeded:500},
+  {name:'A2+',label:'A2 avanzado',xpNeeded:900},
+  {name:'B1',label:'Intermedio bajo',xpNeeded:1400},
+  {name:'B1+',label:'Intermedio',xpNeeded:2000},
+];
+
+let ST = JSON.parse(localStorage.getItem('speakup_a1') || JSON.stringify({
+  xp:0, completedDays:[], streak:0, lastDate:null, wordsLearned:0, phrasesSpoken:0
+}));
+function save(){localStorage.setItem('speakup_a1',JSON.stringify(ST));}
+
+function getLevel(){
+  for(let i=LEVELS.length-1;i>=0;i--){if(ST.xp>=LEVELS[i].xpNeeded)return i;}return 0;
+}
+
+// ═══════════════════════════════════════════
+// HOME RENDER
+// ═══════════════════════════════════════════
+function renderHome(){
+  document.getElementById('hXP').textContent=ST.xp;
+  document.getElementById('hStreak').textContent=ST.streak;
+  document.getElementById('hDays').textContent=ST.completedDays.length;
+  document.getElementById('hWords').textContent=ST.wordsLearned;
+  document.getElementById('hPhrases').textContent=ST.phrasesSpoken;
+
+  const li=getLevel();
+  const lv=LEVELS[li];
+  const lnext=LEVELS[li+1];
+  document.getElementById('levelBadge').textContent=lv.name;
+  document.getElementById('levelLabel').textContent='Nivel '+lv.name+' — '+lv.label;
+  if(lnext){
+    const pct=Math.min(100,Math.round((ST.xp-lv.xpNeeded)/(lnext.xpNeeded-lv.xpNeeded)*100));
+    document.getElementById('xpSubLabel').textContent=ST.xp+' / '+lnext.xpNeeded+' XP para '+lnext.name;
+    document.getElementById('xpBarFill').style.width=pct+'%';
+    const circ=125.6*(1-pct/100);
+    document.getElementById('xpRingFg').style.strokeDashoffset=circ;
+  }
+
+  // Build day path — show current week + 1
+  const completedCount=ST.completedDays.length;
+  const currentWeekIdx=Math.floor(completedCount/7);
+  const showWeekIdx=Math.min(currentWeekIdx,WEEKS.length-1);
+  const week=WEEKS[showWeekIdx];
+  document.getElementById('weekLabel').textContent=week.label;
+
+  const path=document.getElementById('dayPath');
+  path.innerHTML='';
+  week.days.forEach((d,di)=>{
+    const globalIdx=showWeekIdx*7+di;
+    const isDone=ST.completedDays.includes(globalIdx);
+    const isNext=globalIdx===completedCount;
+    const isLocked=globalIdx>completedCount;
+    const node=document.createElement('div');
+    node.className='day-node'+(isDone?' done':isNext?' active-day':isLocked?' locked':'');
+    node.innerHTML=`
+      <div class="day-circle">${isDone?'✅':d.emoji}</div>
+      <div class="day-info">
+        <div class="day-title">Día ${globalIdx+1}: ${d.title}</div>
+        <div class="day-sub">${d.sub}</div>
+        <div class="day-xp">+${d.xp} XP · ${d.acts.length} actividades</div>
+      </div>
+      <span class="day-badge ${isDone?'badge-done':isNext?'badge-active':'badge-locked'}">${isDone?'✓ Listo':isNext?'→ Hoy':'🔒'}</span>`;
+    if(!isLocked && !isDone) node.onclick=()=>startLesson(globalIdx);
+    if(!isLocked && isDone) node.onclick=()=>startLesson(globalIdx);
+    path.appendChild(node);
+  });
+}
+
+// ═══════════════════════════════════════════
+// LESSON ENGINE
+// ═══════════════════════════════════════════
+let curDay=null, curActIdx=0, actAnswers=[], lessonXP=0, lessonWords=0, lessonPhrases=0, lessonCorrect=0, lessonTotal=0;
+let isRec=false, recognition=null, recTranscript='', micOk=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+let vocabIdx=0;
+
+function startLesson(globalIdx){
+  curDay=ALL_DAYS[globalIdx];
+  curActIdx=0; actAnswers=[]; lessonXP=0; lessonWords=0; lessonPhrases=0; lessonCorrect=0; lessonTotal=0;
+  document.getElementById('lessonTitle').textContent='Día '+(globalIdx+1)+': '+curDay.title;
+  showScreen('lesson');
+  renderActivity();
+}
+
+function renderActivity(){
+  const act=curDay.acts[curActIdx];
+  const total=curDay.acts.length;
+  document.getElementById('actCount').textContent=(curActIdx+1)+'/'+total;
+  document.getElementById('pFill').style.width=((curActIdx+1)/total*100)+'%';
+  document.getElementById('btnNext').disabled=true;
+  document.getElementById('btnNext').textContent='Continuar';
+  document.getElementById('btnNext').className='btn btn-primary';
+  document.getElementById('btnSkip').style.display='block';
+
+  const body=document.getElementById('lessonBody');
+  body.innerHTML='';
+
+  if(act.type==='vocab') renderVocab(act,body);
+  else if(act.type==='build') renderBuild(act,body);
+  else if(act.type==='choose') renderChoose(act,body);
+  else if(act.type==='speak') renderSpeak(act,body);
+}
+
+// ── VOCAB ──
+function renderVocab(act,body){
+  vocabIdx=0;
+  const card=mkCard(body,'📚 Vocabulario nuevo','Aprende estas palabras — toca para ver el ejemplo');
+  renderVocabWord(act,card);
+  document.getElementById('btnNext').disabled=false;
+  lessonWords+=act.words.length;
+}
+
+function renderVocabWord(act,card){
+  const w=act.words[vocabIdx];
+  card.querySelector('#vcontent').innerHTML=`
+    <div class="vocab-word" style="cursor:pointer" onclick="speakText('${w.en.replace(/'/g,"\\'")}');this.style.color='var(--accent2)';setTimeout(()=>this.style.color='',500)">${w.en} <span style="font-size:20px">🔊</span></div>
+    <div class="vocab-pron">${w.pron}</div>
+    <div class="vocab-es" style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">${w.es}</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">
+      <button onclick="speakText('${w.en.replace(/'/g,"\\'")}');this.textContent='🔊 Reproduciendo…';setTimeout(()=>this.textContent='🔊 Escuchar palabra',1500)"
+        style="padding:8px 18px;border-radius:99px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer">
+        🔊 Escuchar palabra
+      </button>
+      <button onclick="speakText('${w.ex_en.replace(/'/g,"\\'")}');this.textContent='🔊 Reproduciendo…';setTimeout(()=>this.textContent='🔊 Ejemplo',1800)"
+        style="padding:8px 18px;border-radius:99px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:700;cursor:pointer">
+        🔊 Ejemplo
+      </button>
+    </div>
+    <div class="vocab-example">
+      <div class="vocab-ex-en">"${w.ex_en}"</div>
+      <div class="vocab-ex-es">${w.ex_es}</div>
+    </div>
+    <div id="vocabMicZone" style="margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px">
+      <div style="font-size:11px;color:var(--muted);text-align:center">¿Te animas a repetir la palabra?</div>
+      <button id="vocabMicBtn" onclick="toggleVocabMic('${w.en.replace(/'/g,"\\'")}','${w.pron.replace(/'/g,"\\'")}',this)"
+        style="width:48px;height:48px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);font-size:20px;cursor:pointer;transition:all .2s">🎤</button>
+      <div id="vocabMicFb" style="font-size:12px;color:var(--muted);text-align:center;min-height:18px"></div>
+    </div>
+    <div class="vocab-nav" style="margin-top:14px">
+      <button class="btn btn-ghost" onclick="vocabPrev()" ${vocabIdx===0?'disabled':''} style="font-size:18px">←</button>
+      <span style="flex:1;text-align:center;font-size:12px;color:var(--muted);align-self:center">${vocabIdx+1} / ${act.words.length}</span>
+      <button class="btn btn-primary" onclick="vocabNext()" style="font-size:18px">${vocabIdx===act.words.length-1?'✓':'→'}</button>
+    </div>`;
+  window._curVocabAct=act; window._curVocabCard=card;
+  // Auto-play word
+  setTimeout(()=>speakText(w.en), 300);
+}
+
+let vocabRecActive = false;
+let vocabRec = null;
+
+function toggleVocabMic(word, pron, btn) {
+  if (vocabRecActive) {
+    vocabRecActive = false;
+    if (vocabRec) try { vocabRec.stop(); } catch(e) {}
+    btn.style.background = 'var(--surface2)';
+    btn.style.borderColor = 'var(--border)';
+    btn.textContent = '🎤';
+    return;
+  }
+  if (!micOk) { document.getElementById('vocabMicFb').textContent = 'Micrófono no disponible'; return; }
+  vocabRecActive = true;
+  btn.style.background = 'var(--red)';
+  btn.style.borderColor = 'var(--red)';
+  btn.textContent = '⏹';
+  document.getElementById('vocabMicFb').textContent = 'Escuchando…';
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  vocabRec = new SR();
+  vocabRec.lang = 'en-US';
+  vocabRec.continuous = false;
+  vocabRec.interimResults = false;
+  let heard = '';
+
+  vocabRec.onresult = (e) => {
+    heard = e.results[0][0].transcript.trim();
+  };
+  vocabRec.onend = () => {
+    vocabRecActive = false;
+    btn.style.background = 'var(--surface2)';
+    btn.style.borderColor = 'var(--border)';
+    btn.textContent = '🎤';
+    if (heard) {
+      const clean = s => s.toLowerCase().replace(/[^a-z]/g,'');
+      const match = clean(heard) === clean(word) || clean(heard).includes(clean(word));
+      const fb = document.getElementById('vocabMicFb');
+      if (match) {
+        fb.innerHTML = '<span style="color:var(--green);font-weight:700">✓ ¡Perfecto! Pronunciación reconocida</span>';
+        speakText('Perfect!');
+      } else {
+        const score = Math.round((clean(heard).split('').filter((c,i)=>clean(word)[i]===c).length / clean(word).length)*100);
+        fb.innerHTML = `<span style="color:var(--amber)">Escuché: "${heard}" — ${score>=50?'¡Casi!':'Intenta de nuevo'}</span>`;
+      }
+    } else {
+      document.getElementById('vocabMicFb').textContent = 'No se detectó audio. Intenta de nuevo.';
+    }
+  };
+  vocabRec.onerror = () => {
+    vocabRecActive = false;
+    btn.style.background = 'var(--surface2)';
+    btn.style.borderColor = 'var(--border)';
+    btn.textContent = '🎤';
+    document.getElementById('vocabMicFb').textContent = 'Error de micrófono.';
+  };
+  try { vocabRec.start(); } catch(e) { vocabRecActive = false; }
+}
+
+function mkCard(body,eyebrow,sub){
+  const c=document.createElement('div');
+  c.className='act-card';
+  c.innerHTML=`<div class="act-eyebrow"><span class="act-eyebrow-dot"></span>${eyebrow}</div><div class="act-sub" style="margin-bottom:14px">${sub}</div><div id="vcontent"></div>`;
+  body.appendChild(c);
+  return c;
+}
+
+function vocabNext(){
+  const act=window._curVocabAct,card=window._curVocabCard;
+  if(vocabIdx<act.words.length-1){vocabIdx++;renderVocabWord(act,card);}
+  else{document.getElementById('btnNext').disabled=false;}
+}
+function vocabPrev(){
+  const act=window._curVocabAct,card=window._curVocabCard;
+  if(vocabIdx>0){vocabIdx--;renderVocabWord(act,card);}
+}
+
+// ── BUILD ──
+let buildSelected=[];
+function renderBuild(act,body){
+  buildSelected=[];
+  const card=document.createElement('div');
+  card.className='act-card';
+  card.innerHTML=`
+    <div class="act-eyebrow"><span class="act-eyebrow-dot"></span>🧩 Construye la frase</div>
+    <div class="phrase-target" id="buildTarget">${act.es}</div>
+    <div class="phrase-translation" id="buildTrans">Ordena las palabras en inglés</div>
+    <div class="answer-slots" id="answerSlots"><span class="answer-placeholder">Toca las palabras en orden…</span></div>
+    <div class="word-bank" id="wordBank"></div>
+    <div id="buildFb"></div>`;
+  body.appendChild(card);
+
+  const bank=[...act.bank].sort(()=>Math.random()-.5);
+  const bankEl=card.querySelector('#wordBank');
+  bank.forEach(w=>{
+    const chip=document.createElement('div');
+    chip.className='word-chip';
+    chip.textContent=w;
+    chip.onclick=()=>addWord(chip,w,act);
+    bankEl.appendChild(chip);
+  });
+}
+
+function addWord(chip,w,act){
+  if(chip.classList.contains('used'))return;
+  chip.classList.add('used');
+  buildSelected.push({word:w,chip});
+  const slots=document.querySelector('#answerSlots');
+  slots.querySelectorAll('.answer-placeholder').forEach(el=>el.remove());
+  const aword=document.createElement('div');
+  aword.className='answer-word';
+  aword.textContent=w;
+  aword.onclick=()=>{
+    chip.classList.remove('used');
+    buildSelected=buildSelected.filter(x=>x.chip!==chip);
+    aword.remove();
+    if(!slots.querySelectorAll('.answer-word').length)
+      slots.innerHTML='<span class="answer-placeholder">Toca las palabras en orden…</span>';
+  };
+  slots.appendChild(aword);
+
+  if(buildSelected.length===act.answer.length){
+    const correct=buildSelected.map(x=>x.word).join(' ')===act.answer.join(' ');
+    const fb=document.querySelector('#buildFb');
+    if(correct){
+      fb.innerHTML=`<div class="fb-box good"><div class="fb-emoji">🎉</div><div class="fb-title" style="color:var(--green)">¡Correcto!</div><div class="fb-text">La frase en inglés es: <strong>${act.answer.join(' ')}</strong></div></div>`;
+      lessonCorrect++;lessonTotal++;
+      document.getElementById('btnNext').disabled=false;
+      document.getElementById('btnNext').className='btn btn-green';
+      document.getElementById('btnSkip').style.display='none';
+    }else{
+      fb.innerHTML=`<div class="fb-box bad"><div class="fb-emoji">💡</div><div class="fb-title" style="color:var(--amber)">Casi — intenta de nuevo</div><div class="fb-text">La respuesta correcta: <strong style="color:var(--green)">${act.answer.join(' ')}</strong></div></div>`;
+      lessonTotal++;
+      document.getElementById('btnNext').disabled=false;
+    }
+  }
+}
+
+// ── CHOOSE ──
+function renderChoose(act,body){
+  const card=document.createElement('div');
+  card.className='act-card';
+  card.innerHTML=`
+    <div class="act-eyebrow"><span class="act-eyebrow-dot"></span>🎧 Escucha y elige</div>
+    <div style="text-align:center;margin-bottom:6px;font-size:13px;color:var(--muted)">"${act.audio_text}"</div>
+    <button class="audio-btn" onclick="speakText('${act.audio_text.replace(/'/g,"\\'")}')">🔊</button>
+    <div style="font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:16px">${act.question}</div>
+    <div class="choices" id="choices"></div>`;
+  body.appendChild(card);
+  // Auto-play after short delay
+  setTimeout(()=>speakText(act.audio_text), 500);
+
+  const ch=card.querySelector('#choices');
+  act.options.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent=opt;
+    btn.onclick=()=>{
+      document.querySelectorAll('.choice-btn').forEach(b=>b.classList.add('answered'));
+      document.querySelectorAll('.choice-btn').forEach(b=>b.style.pointerEvents='none');
+      lessonTotal++;
+      if(i===act.correct){
+        btn.classList.add('correct');
+        lessonCorrect++;
+        document.getElementById('btnNext').disabled=false;
+        document.getElementById('btnNext').className='btn btn-green';
+        document.getElementById('btnSkip').style.display='none';
+        popXP(5);
+      }else{
+        btn.classList.add('wrong');
+        document.querySelectorAll('.choice-btn')[act.correct].classList.add('correct');
+        document.getElementById('btnNext').disabled=false;
+      }
+    };
+    ch.appendChild(btn);
+  });
+  speakText(act.audio_text);
+}
+
+function speakText(text){
+  if(!window.speechSynthesis)return;
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=0.85;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+
+// ── SPEAK ──
+function renderSpeak(act,body){
+  const card=document.createElement('div');
+  card.className='act-card';
+  card.innerHTML=`
+    <div class="act-eyebrow"><span class="act-eyebrow-dot"></span>🗣️ Tu turno — habla</div>
+    <div class="speak-prompt">"${act.phrase}"</div>
+    <div class="speak-es">${act.es}</div>
+    ${act.tip?`<div style="background:var(--surface2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:14px;text-align:center">💡 ${act.tip}</div>`:''}
+    <button class="audio-btn" onclick="speakText('${act.phrase.replace(/'/g,"\\'")}')">🔊</button>
+    <div class="mic-wrap">
+      ${micOk?`<button class="mic-btn" id="micBtn" onclick="toggleMic('${act.phrase.replace(/'/g,"\\'")}')">🎤</button>
+      <div class="mic-hint" id="micHint">Escucha primero 🔊 luego toca el micrófono</div>
+      <div class="transcript-display" id="tDisplay" style="display:none"></div>`
+      :`<div style="font-size:13px;color:var(--muted);margin-bottom:10px">Escribe la frase en inglés:</div>
+      <textarea class="type-input" id="typeBox" rows="2" placeholder="${act.phrase}" style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;font-size:14px;color:var(--text);width:100%;font-family:inherit;resize:none"></textarea>
+      <button class="btn btn-primary" onclick="checkTyped('${act.phrase.replace(/'/g,"\\'")}',this)" style="margin-top:10px">Verificar</button>`}
+    </div>
+    <div id="speakFb"></div>`;
+  body.appendChild(card);
+  speakText(act.phrase);
+}
+
+function toggleMic(phrase){
+  if(isRec){stopMic(phrase);}else{startMic();}
+}
+
+function startMic(){
+  isRec=true;recTranscript='';
+  const btn=document.getElementById('micBtn');
+  btn.className='mic-btn rec';btn.textContent='⏹';
+  document.getElementById('micHint').textContent='Grabando… toca para detener';
+  const tDisp=document.getElementById('tDisplay');
+  if(tDisp){tDisp.style.display='block';tDisp.textContent='Escuchando…';}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.lang='en-US';recognition.continuous=true;recognition.interimResults=true;
+  recognition.onresult=(e)=>{
+    let f='',interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)f+=e.results[i][0].transcript+' ';
+      else interim+=e.results[i][0].transcript;
+    }
+    recTranscript+=f;
+    if(tDisp)tDisp.textContent=(recTranscript+interim)||'Escuchando…';
+  };
+  recognition.onerror=()=>stopMic('');
+  recognition.onend=()=>{if(isRec)try{recognition.start();}catch(e){}};
+  try{recognition.start();}catch(e){isRec=false;}
+}
+
+function stopMic(phrase){
+  isRec=false;
+  if(recognition)try{recognition.stop();}catch(e){}recognition=null;
+  const btn=document.getElementById('micBtn');
+  if(btn){btn.className='mic-btn';btn.textContent='🎤';}
+  const hint=document.getElementById('micHint');
+  if(hint)hint.textContent='Toca para intentar de nuevo';
+  if(recTranscript.trim()&&phrase)evaluateSpeak(recTranscript.trim(),phrase);
+  else if(!phrase){}
+  else{
+    document.getElementById('speakFb').innerHTML=`<div class="fb-box ok"><div class="fb-emoji">🎤</div><div class="fb-title" style="color:var(--amber)">No se detectó audio</div><div class="fb-text">Intenta de nuevo o usa el teclado</div></div>`;
+    document.getElementById('btnNext').disabled=false;
+  }
+}
+
+function checkTyped(phrase,btn){
+  const val=document.getElementById('typeBox').value.trim();
+  if(!val){toast('Escribe la frase primero');return;}
+  evaluateSpeak(val,phrase);
+  btn.disabled=true;
+}
+
+async function evaluateSpeak(said, phrase){
+  lessonPhrases++;
+  lessonTotal++;
+  const fb = document.getElementById('speakFb');
+
+  // Show loading
+  fb.innerHTML = `<div class="fb-box ok" style="text-align:center">
+    <div class="fb-emoji">🤖</div>
+    <div class="fb-title" style="color:var(--accent2)">Analizando pronunciación…</div>
+    <div class="fb-text"><span class="dots"><span></span><span></span><span></span></span></div>
+  </div>`;
+  document.getElementById('btnNext').disabled = true;
+  document.getElementById('btnSkip').style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 600,
+        system: `Eres un coach de pronunciación de inglés para hispanohablantes principiantes (nivel A1).
+El estudiante intentó decir una frase en inglés. El reconocimiento de voz capturó lo que dijo.
+Compara lo que dijo vs la frase objetivo y evalúa su pronunciación.
+Responde SOLO con JSON válido, sin markdown, con esta estructura exacta:
+{
+  "score": <número 0-100>,
+  "level": <"excellent"|"good"|"try_again">,
+  "main_feedback": "<1-2 frases en español, muy alentadoras, para nivel principiante>",
+  "phonetic_tips": ["<tip específico de pronunciación en español, máx 2 tips>"],
+  "word_focus": "<la palabra más difícil de pronunciar de la frase, solo la palabra>",
+  "word_phonetic": "<cómo pronunciarla en español fonético, ej: 'morning' → mor-ning>",
+  "try_again": <true|false>
+}`,
+        messages: [{
+          role: 'user',
+          content: `Frase objetivo: "${phrase}"
+Lo que dijo el estudiante: "${said}"`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content[0].text.replace(/```json|```/g,'').trim();
+    const ev = JSON.parse(raw);
+
+    const colors = { excellent: 'var(--green)', good: 'var(--amber)', try_again: 'var(--red)' };
+    const emojis = { excellent: '🌟', good: '👍', try_again: '🔁' };
+    const titles = { excellent: '¡Excelente pronunciación!', good: '¡Buen intento! Sigue practicando', try_again: 'Inténtalo de nuevo' };
+    const col = colors[ev.level] || 'var(--amber)';
+
+    // Score bar
+    const barColor = ev.score >= 70 ? 'var(--green)' : ev.score >= 45 ? 'var(--amber)' : 'var(--red)';
+
+    fb.innerHTML = `
+      <div class="fb-box ${ev.level === 'excellent' ? 'good' : ev.level === 'good' ? 'ok' : 'bad'}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:22px">${emojis[ev.level]}</span>
+            <span class="fb-title" style="color:${col}">${titles[ev.level]}</span>
+          </div>
+          <span style="font-size:20px;font-weight:900;color:${col}">${ev.score}%</span>
+        </div>
+
+        <div style="background:var(--bg);border-radius:99px;height:6px;margin-bottom:12px">
+          <div style="width:${ev.score}%;height:6px;border-radius:99px;background:${barColor};transition:width .8s ease"></div>
+        </div>
+
+        <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:10px">${ev.main_feedback}</div>
+
+        <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Tu transcripción</div>
+          <div style="font-size:13px;color:var(--accent2);font-style:italic">"${said}"</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Objetivo: <strong style="color:var(--green)">"${phrase}"</strong></div>
+        </div>
+
+        ${ev.word_focus ? `
+        <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Palabra clave</div>
+            <div style="font-size:16px;font-weight:800;color:var(--text)">${ev.word_focus}</div>
+            <div style="font-size:12px;color:var(--accent2);margin-top:2px">📢 ${ev.word_phonetic}</div>
+          </div>
+          <button onclick="speakText('${ev.word_focus.replace(/'/g,"\'")}');this.textContent='🔊';setTimeout(()=>this.textContent='▶',1200)" style="width:40px;height:40px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:16px;cursor:pointer">▶</button>
+        </div>` : ''}
+
+        ${ev.phonetic_tips && ev.phonetic_tips.length ? `
+        <div style="background:var(--bg);border-radius:10px;padding:10px 12px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">💡 Tips de pronunciación</div>
+          ${ev.phonetic_tips.map(t => `<div style="font-size:12px;color:var(--text);margin-bottom:4px;line-height:1.5">• ${t}</div>`).join('')}
+        </div>` : ''}
+      </div>`;
+
+    if (ev.level === 'excellent') {
+      lessonCorrect++;
+      document.getElementById('btnNext').className = 'btn btn-green';
+      popXP(10);
+    } else if (ev.level === 'good') {
+      lessonCorrect++;
+      popXP(5);
+    }
+
+  } catch(e) {
+    // Fallback to basic evaluation
+    const clean = s => s.toLowerCase().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();
+    const words1 = clean(phrase).split(' ');
+    const words2 = clean(said).split(' ');
+    const matches = words1.filter(w => words2.includes(w)).length;
+    const score = Math.round(matches/words1.length*100);
+    const good = score >= 65;
+    fb.innerHTML = `<div class="fb-box ${good?'good':'ok'}">
+      <div class="fb-emoji">${good?'🌟':'👍'}</div>
+      <div class="fb-title" style="color:${good?'var(--green)':'var(--amber)'}">${good?'¡Bien hecho!':'Sigue practicando'}</div>
+      <div class="fb-text">Dijiste: "<em>${said}</em>"<br>Objetivo: "<strong style="color:var(--green)">${phrase}</strong>"</div>
+    </div>`;
+    if(good){lessonCorrect++;document.getElementById('btnNext').className='btn btn-green';popXP(8);}
+  }
+
+  document.getElementById('btnNext').disabled = false;
+  document.getElementById('btnSkip').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function nextActivity(){
+  curActIdx++;
+  if(curActIdx>=curDay.acts.length){finishLesson();}
+  else{renderActivity();}
+}
+
+function skipActivity(){
+  lessonTotal++;
+  nextActivity();
+}
+
+function finishLesson(){
+  const globalIdx=curDay.globalIdx;
+  if(!ST.completedDays.includes(globalIdx))ST.completedDays.push(globalIdx);
+  ST.xp+=curDay.xp;
+  ST.wordsLearned+=lessonWords;
+  ST.phrasesSpoken+=lessonPhrases;
+  const today=new Date().toDateString();
+  if(ST.lastDate!==today){
+    ST.streak=(ST.lastDate===new Date(Date.now()-86400000).toDateString())?ST.streak+1:1;
+    ST.lastDate=today;
+  }
+  save();
+
+  const pct=lessonTotal?Math.round(lessonCorrect/lessonTotal*100):0;
+  document.getElementById('rCircle').textContent=pct>=80?'🌟':pct>=60?'💪':'📈';
+  document.getElementById('rTitle').textContent=pct>=80?'¡Excelente!':pct>=60?'¡Buen trabajo!':'¡Sigue adelante!';
+  doc
+  document.getElementById('rSub').textContent='Completaste: '+curDay.title;
+  document.getElementById('rXP').textContent='+'+curDay.xp;
+  document.getElementById('rWords').textContent=lessonWords;
+  document.getElementById('rCorrect').textContent=pct+'%';
+
+  const vocab=curDay.acts.find(a=>a.type==='vocab');
+  const ll=document.getElementById('learnedList');
+  if(vocab){
+    ll.innerHTML='<div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Palabras de hoy</div>'+
+      vocab.words.map(w=>`<div class="learned-item"><div class="learned-en">${w.en}</div><div class="learned-es">${w.es}</div></div>`).join('');
+  }else{
+    ll.innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:10px">¡Sesión de práctica completada!</div>';
+  }
+  showScreen('result');
+}
+
+function goHome(){
+  if(isRec)stopMic('');
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  showScreen('home');
+  renderHome();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById('s-'+id).style.display='flex';
+}
+
+function popXP(n){
+  ST.xp+=n;save();
+  const p=document.getElementById('xpPop');
+  p.textContent='+'+n+' XP ⚡';
+  p.classList.remove('hide');p.classList.add('show');
+  setTimeout(()=>{p.classList.remove('show');p.classList.add('hide');},1000);
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+renderHome();
+</script>
+</body>
+</html>
